@@ -14,7 +14,7 @@ public class ArrayTest {
 	@Before
 	public void setUp()
 	{
-		array=new MyArray("1,2,3,4,5,6,7,8,9,10");
+		array=new MyArray("1,2,3,4,5,6,7,8,9,10"); //初始array內容,可更改
 	}
 	
 	/*test完後執行的函式*/
