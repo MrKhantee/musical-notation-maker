@@ -21,7 +21,7 @@ public class CheckBeat
 		String[] filenames = dir.list();//列出所有附錄下檔名
 		for(int i=0;i<filenames.length;i++)
 		{
-			System.out.println(filenames[i]);
+			System.out.println("檔名:"+filenames[i]);
 			FileReader fr = new FileReader("./song/"+filenames[i]);  
 	        BufferedReader br=new BufferedReader(fr);  
 	        String line;  
@@ -52,7 +52,7 @@ public class CheckBeat
 			for(int j=1;j<=howManySection-1;j++)
 			{
 				float  Beat = Check(Section[j],standard);
-				System.out.println(Beat+" "+sectionId);//印出是音檔中哪一小節和算出的節拍數
+				System.out.println("節拍數:"+Beat+" "+"小節數:"+sectionId+" 標準節拍數:"+sectionBeat);//印出是音檔中哪一小節和算出的節拍數
 				/*
 				 可以在這邊check每一音檔每一小節是否有節拍錯誤 
 				if(sectionBeat == Beat)  
@@ -72,7 +72,7 @@ public class CheckBeat
         int note = 0;//這是幾分音符
         float delay = 0;//這是多少延音
         float ansBeat = 0;//最後那一小節的節拍數
-		System.out.println(Section);
+		//System.out.println(Section);
 		Pattern pattern = Pattern.compile("\\([#|b]??,.*?,.*?\\)");//(給自己的註解:match最短    p.s括號跟|都算特殊字元)
         Matcher matcher = pattern.matcher(Section);
         while (matcher.find())
