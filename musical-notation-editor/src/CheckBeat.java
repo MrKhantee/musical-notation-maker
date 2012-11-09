@@ -66,7 +66,7 @@ public class CheckBeat
 				//System.out.println("節拍數:"+Beat+" "+"小節數:"+SectionId+" 標準節拍數:"+CorrectSectionBeat);//印出是音檔中哪一小節和算出的節拍數
 				/*
 				 可以在這邊check每一音檔每一小節是否有節拍錯誤 
-				if(sectionBeat == Beat)  
+				if(sectionBeat == (int)Beat)  
 				{
 					正確!!!
 				}  
