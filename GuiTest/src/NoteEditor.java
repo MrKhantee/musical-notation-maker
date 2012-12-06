@@ -1,11 +1,13 @@
 import java.awt.EventQueue;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
-
+import java.awt.Robot;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
@@ -29,22 +31,27 @@ import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 import javax.swing.text.Position;
 import javax.swing.text.StyleContext.NamedStyle;
+import javax.imageio.*;
 import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+
 import javax.swing.ButtonGroup;
 
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
+import javax.swing.JButton;
 
 
 
 
-public class Guitest extends JFrame {
+public class NoteEditor extends JFrame {
 
 	private JPanel contentPane;
 	private JTextPane textPane;
@@ -57,8 +64,8 @@ public class Guitest extends JFrame {
 	private JToggleButton tglbtnNewToggleButton_5;
 	private JToggleButton tglbtnNewToggleButton_6;
 	private JToggleButton tglbtnNewToggleButton_7;
-	private JToggleButton selectedNoteButton;   //­µªø¤¤¤¶ªÌ
-	private JToggleButton selectedTuneButton;   //­µ°ª¤¤¤¶ªÌ
+	private JToggleButton selectedNoteButton;   //ä¸­ä»‹è€…
+	private JToggleButton selectedTuneButton;   //ä¸­ä»‹è€…
 
 	/**
 	 * Launch the application.
@@ -67,7 +74,7 @@ public class Guitest extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Guitest frame = new Guitest();
+					NoteEditor frame = new NoteEditor();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -79,7 +86,7 @@ public class Guitest extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public Guitest() {
+	public NoteEditor() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 674, 461);
 		contentPane = new JPanel();
@@ -352,6 +359,27 @@ public class Guitest extends JFrame {
 		});
 		tglbtnNewToggleButton_7.setBounds(411, 80, 119, 23);
 		contentPane.add(tglbtnNewToggleButton_7);
+		
+		JToggleButton tglbtnSave = new JToggleButton("Save");
+		tglbtnSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try
+				{
+					Rectangle textRec=textPane.getBounds();
+					Point textRecXY=new Point(textRec.x,textRec.y);
+					Point textRecWH=new Point(textRec.width,textRec.height);
+					SwingUtilities.convertPointToScreen(textRecXY,contentPane);
+					textRec.setBounds(textRecXY.x,textRecXY.y,textRecWH.x,textRecWH.y);
+					BufferedImage bi = new Robot().createScreenCapture(textRec);
+		            ImageIO.write(bi, "jpg", new File("t.jpg"));
+				}
+				catch(Exception ex){}
+				
+			}
+		});
+		tglbtnSave.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		tglbtnSave.setBounds(10, 43, 91, 23);
+		contentPane.add(tglbtnSave);
 		
 
 		
