@@ -41,6 +41,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
+import java.util.Vector;
 
 import javax.swing.ButtonGroup;
 
@@ -48,6 +50,9 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 
 
@@ -67,6 +72,7 @@ public class NoteEditor extends JFrame {
 	private JToggleButton tglbtnNewToggleButton_7;
 	private JToggleButton selectedNoteButton;   //中介者
 	private JToggleButton selectedTuneButton;   //中介者
+	protected Vector Content;
 
 	/**
 	 * Launch the application.
@@ -89,7 +95,7 @@ public class NoteEditor extends JFrame {
 	 */
 	public NoteEditor() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 674, 461);
+		setBounds(100, 100, 674, 493);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -97,18 +103,18 @@ public class NoteEditor extends JFrame {
 
 		textPane = new JTextPane();
 		textPane.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		textPane.setBounds(10, 134, 638, 279);
+		textPane.setBounds(10, 166, 638, 279);
 		contentPane.add(textPane);
 		textPane.setEditorKit(new StyledEditorKit() { 
             public ViewFactory getViewFactory() { 
-                return new NewViewFactory(); 
+                return new NewViewFactory(NoteEditor.this); 
 
             } 
         }); 
 		
         StyledDocument doc = (StyledDocument) textPane.getDocument(); 
         Style style=new StyleContext().new NamedStyle();
-        StyleConstants.setSpaceAbove(style, 10);
+        StyleConstants.setSpaceAbove(style, 20);
         StyleConstants.setSpaceBelow(style, 10);
         StyleConstants.setLeftIndent(style, 10);
         textPane.setLogicalStyle(style);
@@ -137,6 +143,9 @@ public class NoteEditor extends JFrame {
 
        
 		final MutableAttributeSet attr = new SimpleAttributeSet(); 
+		attr.addAttribute("Note",new Integer(0)); 
+		attr.addAttribute("Tune",new Integer(0)); 
+		textPane.setCharacterAttributes(attr,false);
 		
 		JToggleButton tglbtnth = new JToggleButton("4th");
 		selectedNoteButton=tglbtnth;
@@ -362,7 +371,7 @@ public class NoteEditor extends JFrame {
 		tglbtnNewToggleButton_7.setBounds(488, 76, 119, 23);
 		contentPane.add(tglbtnNewToggleButton_7);
 		
-		JButton tglbtnSave = new JButton("Save");
+		JButton tglbtnSave = new JButton("Save As img");
 		tglbtnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try
@@ -415,7 +424,88 @@ public class NoteEditor extends JFrame {
 		tglbtnTune.setBounds(35, 43, 119, 23);
 		contentPane.add(tglbtnTune);
 		
-
+		JButton btnSharp = new JButton("Sharp");
+		btnSharp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				StyledDocument doc = textPane.getStyledDocument();
+				try
+				{
+				    doc.insertString(doc.getLength(), "#",null );
+				}
+				catch(Exception e) { System.out.println(e); }
+			}
+		});
+		btnSharp.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnSharp.setBounds(35, 109, 119, 23);
+		contentPane.add(btnSharp);
+		
+		String[] Notes = {"4th","8th","16th","32th"};
+		JComboBox comboBox = new JComboBox(Notes);
+		comboBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent arg0) {
+				if (arg0.getStateChange() == ItemEvent.SELECTED) 
+				{
+					String Note=arg0.getItem().toString();
+					if(Note=="8th")
+					{
+						attr.addAttribute("Note",new Integer(1)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+				}
+				
+			}
+		});
+		comboBox.setBounds(496, 110, 111, 21);
+		contentPane.add(comboBox);
+		
+		JButton btnFalt = new JButton("Flat");
+		btnFalt.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				StyledDocument doc = textPane.getStyledDocument();
+				try
+				{
+				    doc.insertString(doc.getLength(), "b",null );
+				}
+				catch(Exception e) { System.out.println(e); }
+				
+			}
+		});
+		btnFalt.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnFalt.setBounds(179, 109, 119, 23);
+		contentPane.add(btnFalt);
+		
+		JButton btnSave = new JButton("Save");
+		btnSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try
+				{
+					JFileChooser fc = new JFileChooser();
+					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					fc.setSelectedFile(new File("C:\\*.song")); 
+					int choose=fc.showSaveDialog(NoteEditor.this);
+					if(choose == JFileChooser.APPROVE_OPTION)
+					{
+						File savePath = fc.getSelectedFile();
+						FileWriter fileWriter=new FileWriter(savePath);
+						for(int i=0;i<Content.size();i++)
+						{
+							if(Content.get(i)!=null)
+							{
+								fileWriter.write(Content.get(i).toString()+" ");
+							}
+						}
+						fileWriter.close(); 
+					}
+					
+				}
+				catch(Exception ex){}
+			}
+		});
+		btnSave.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnSave.setBounds(332, 109, 119, 23);
+		contentPane.add(btnSave);
+		
+		Content=new Vector();
 		
 		
 
@@ -435,12 +525,18 @@ public class NoteEditor extends JFrame {
 }
 
 class NewViewFactory implements ViewFactory { 
+	private NoteEditor Editor;
+	NewViewFactory(NoteEditor e)
+	{
+		Editor=e;
+	}
+	
     public View create(Element elem) { 
         String kind = elem.getName(); 
         if (kind != null) { 
             if (kind.equals(AbstractDocument.ContentElementName)) { 
 
-                return new MyLabelView(elem); 
+                return new MyLabelView(elem,Editor); 
             } 
             else if (kind.equals(AbstractDocument.ParagraphElementName)) { 
                 return new ParagraphView(elem); 
@@ -462,10 +558,11 @@ class NewViewFactory implements ViewFactory {
 } 
  
 class MyLabelView extends LabelView { 
-
+	private NoteEditor Editor;
  
-    public MyLabelView(Element elem) { 
+    public MyLabelView(Element elem,NoteEditor e) { 
         super(elem); 
+        Editor=e;
     } 
  
     public void paint(Graphics g, Shape allocation) { 
@@ -536,8 +633,7 @@ class MyLabelView extends LabelView {
             {
             	DotCount=Math.abs(DotCount);
             	int lineCount;
-            	if(Note==null)  lineCount=0;
-            	else lineCount=Note.intValue()-1;
+            	lineCount=Note.intValue();
             	int y = a.getBounds().y + a.getBounds().height - (int) getGlyphPainter().getDescent(this); 
             	for(int Start=getStartOffset();Start+1<=End;Start++)
             	{
@@ -560,5 +656,38 @@ class MyLabelView extends LabelView {
             	}
             }
         }
+        String StringToTransform=getText(getStartOffset(),getEndOffset()).toString();
+        FormatTransformer Transformer=new FormatTransformer();
+        if (Note!=null && Tune!=null) 
+        {
+        	Vector temp=Transformer.FormatTransform(StringToTransform,(int)(4*Math.pow(2,Note.intValue())),Tune.intValue());
+        	int index=0;
+        	for(int start=0;start<StringToTransform.length();start++)
+        	{
+        		if(StringToTransform.charAt(start)=='|')
+        		{
+        			if(getStartOffset()+start>=Editor.Content.size())
+        			{
+        				Editor.Content.setSize(Editor.Content.size()+10);
+        			}
+        			Editor.Content.setElementAt("|",getStartOffset()+start);
+        		}
+        		
+        		if(Character.isDigit(StringToTransform.charAt(start)))
+        		{
+        			if(getStartOffset()+start>=Editor.Content.size())
+        			{
+        				Editor.Content.setSize(Editor.Content.size()+10);
+        			}
+        			Editor.Content.setElementAt(temp.get(index),getStartOffset()+start);
+        			index++;
+        		}
+        	}
+        	
+            
+        }
+
+
+        
     } 
 } 
