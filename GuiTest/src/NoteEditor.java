@@ -40,7 +40,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Vector;
 
@@ -53,6 +55,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import javax.swing.DefaultComboBoxModel;
 
 
 
@@ -62,14 +65,7 @@ public class NoteEditor extends JFrame {
 	private JPanel contentPane;
 	private JTextPane textPane;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
-	private JToggleButton tglbtnNewToggleButton_2;
-	private JToggleButton tglbtnHtune;
-	private JToggleButton tglbtnNewToggleButton_3;
-	private JToggleButton tglbtnNewToggleButton_4;
 	private final ButtonGroup buttonGroup_1 = new ButtonGroup();
-	private JToggleButton tglbtnNewToggleButton_5;
-	private JToggleButton tglbtnNewToggleButton_6;
-	private JToggleButton tglbtnNewToggleButton_7;
 	private JToggleButton selectedNoteButton;   //中介者
 	private JToggleButton selectedTuneButton;   //中介者
 	protected Vector Content;
@@ -94,6 +90,7 @@ public class NoteEditor extends JFrame {
 	 * Create the frame.
 	 */
 	public NoteEditor() {
+		Content=new Vector();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 674, 493);
 		contentPane = new JPanel();
@@ -147,230 +144,6 @@ public class NoteEditor extends JFrame {
 		attr.addAttribute("Tune",new Integer(0)); 
 		textPane.setCharacterAttributes(attr,false);
 		
-		JToggleButton tglbtnth = new JToggleButton("4th");
-		selectedNoteButton=tglbtnth;
-		tglbtnth.setSelected(true);
-		tglbtnth.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Note",new Integer(0)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedNoteButton!=null && selectedNoteButton!=toggle)
-					{
-						selectedNoteButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedNoteButton=toggle;
-				}
-			}
-		});
-		buttonGroup.add(tglbtnth);
-		tglbtnth.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		tglbtnth.setBounds(35, 10, 119, 23);
-		contentPane.add(tglbtnth);
-		
-		
-		JToggleButton tglbtnNewToggleButton = new JToggleButton("8th");
-		buttonGroup.add(tglbtnNewToggleButton);
-		tglbtnNewToggleButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnNewToggleButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Note",new Integer(1)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedNoteButton!=null && selectedNoteButton!=toggle)
-					{
-						selectedNoteButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedNoteButton=toggle;
-				}
-			}
-		});
-		tglbtnNewToggleButton.setBounds(179, 10, 119, 23);
-		contentPane.add(tglbtnNewToggleButton);
-		
-		JToggleButton tglbtnNewToggleButton_1 = new JToggleButton("16th");
-		buttonGroup.add(tglbtnNewToggleButton_1);
-		tglbtnNewToggleButton_1.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnNewToggleButton_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Note",new Integer(2)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedNoteButton!=null && selectedNoteButton!=toggle)
-					{
-						selectedNoteButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedNoteButton=toggle;
-				}
-			}
-		});
-		tglbtnNewToggleButton_1.setBounds(332, 10, 119, 23);
-		contentPane.add(tglbtnNewToggleButton_1);
-		
-		tglbtnNewToggleButton_2 = new JToggleButton("32th");
-		buttonGroup.add(tglbtnNewToggleButton_2);
-		tglbtnNewToggleButton_2.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnNewToggleButton_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Note",new Integer(3)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedNoteButton!=null && selectedNoteButton!=toggle)
-					{
-						selectedNoteButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedNoteButton=toggle;
-				}
-			}
-		});
-		tglbtnNewToggleButton_2.setBounds(488, 10, 119, 23);
-		contentPane.add(tglbtnNewToggleButton_2);
-		
-		tglbtnHtune = new JToggleButton("HTune");
-		buttonGroup_1.add(tglbtnHtune);
-		tglbtnHtune.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnHtune.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Tune",new Integer(1)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedTuneButton!=null && selectedTuneButton!=toggle)
-					{
-						selectedTuneButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedTuneButton=toggle;
-				}
-			}
-		});
-		tglbtnHtune.setBounds(179, 43, 119, 23);
-		contentPane.add(tglbtnHtune);
-		
-		tglbtnNewToggleButton_3 = new JToggleButton("HHTune");
-		buttonGroup_1.add(tglbtnNewToggleButton_3);
-		tglbtnNewToggleButton_3.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnNewToggleButton_3.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Tune",new Integer(2)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedTuneButton!=null && selectedTuneButton!=toggle)
-					{
-						selectedTuneButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedTuneButton=toggle;
-				}
-			}
-		});
-		tglbtnNewToggleButton_3.setActionCommand("HHTune");
-		tglbtnNewToggleButton_3.setBounds(332, 43, 119, 23);
-		contentPane.add(tglbtnNewToggleButton_3);
-		
-		tglbtnNewToggleButton_4 = new JToggleButton("HHHTune");
-		buttonGroup_1.add(tglbtnNewToggleButton_4);
-		tglbtnNewToggleButton_4.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnNewToggleButton_4.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Tune",new Integer(3)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedTuneButton!=null && selectedTuneButton!=toggle)
-					{
-						selectedTuneButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedTuneButton=toggle;
-				}
-			}
-		});
-		tglbtnNewToggleButton_4.setBounds(488, 43, 119, 23);
-		contentPane.add(tglbtnNewToggleButton_4);
-		
-		tglbtnNewToggleButton_5 = new JToggleButton("LTune");
-		buttonGroup_1.add(tglbtnNewToggleButton_5);
-		tglbtnNewToggleButton_5.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnNewToggleButton_5.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Tune",new Integer(-1)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedTuneButton!=null && selectedTuneButton!=toggle)
-					{
-						selectedTuneButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedTuneButton=toggle;
-				}
-			}
-		});
-		tglbtnNewToggleButton_5.setBounds(179, 76, 119, 23);
-		contentPane.add(tglbtnNewToggleButton_5);
-		
-		tglbtnNewToggleButton_6 = new JToggleButton("LLTune");
-		buttonGroup_1.add(tglbtnNewToggleButton_6);
-		tglbtnNewToggleButton_6.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnNewToggleButton_6.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Tune",new Integer(-2)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedTuneButton!=null && selectedTuneButton!=toggle)
-					{
-						selectedTuneButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedTuneButton=toggle;
-				}
-			}
-		});
-		tglbtnNewToggleButton_6.setBounds(332, 76, 119, 23);
-		contentPane.add(tglbtnNewToggleButton_6);
-		
-		tglbtnNewToggleButton_7 = new JToggleButton("LLLTune");
-		buttonGroup_1.add(tglbtnNewToggleButton_7);
-		tglbtnNewToggleButton_7.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnNewToggleButton_7.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Tune",new Integer(-3)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedTuneButton!=null && selectedTuneButton!=toggle)
-					{
-						selectedTuneButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedTuneButton=toggle;
-				}
-			}
-		});
-		tglbtnNewToggleButton_7.setBounds(488, 76, 119, 23);
-		contentPane.add(tglbtnNewToggleButton_7);
-		
 		JButton tglbtnSave = new JButton("Save As img");
 		tglbtnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -400,30 +173,6 @@ public class NoteEditor extends JFrame {
 		tglbtnSave.setBounds(35, 76, 119, 23);
 		contentPane.add(tglbtnSave);
 		
-		JToggleButton tglbtnTune = new JToggleButton("Tune");
-		selectedTuneButton=tglbtnTune;
-		tglbtnTune.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton toggle = (JToggleButton)e.getSource();
-				if(toggle.isSelected())
-				{
-					attr.addAttribute("Tune",new Integer(0)); 
-					toggle.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-					if(selectedTuneButton!=null && selectedTuneButton!=toggle)
-					{
-						selectedTuneButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-					}
-					textPane.setCharacterAttributes(attr,false);
-					selectedTuneButton=toggle;
-				}
-			}
-		});
-		buttonGroup_1.add(tglbtnTune);
-		tglbtnTune.setSelected(true);
-		tglbtnTune.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		tglbtnTune.setBounds(35, 43, 119, 23);
-		contentPane.add(tglbtnTune);
-		
 		JButton btnSharp = new JButton("Sharp");
 		btnSharp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -446,16 +195,31 @@ public class NoteEditor extends JFrame {
 				if (arg0.getStateChange() == ItemEvent.SELECTED) 
 				{
 					String Note=arg0.getItem().toString();
-					if(Note=="8th")
+					if(Note=="4th")
+					{
+						attr.addAttribute("Note",new Integer(0)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+					else if(Note=="8th")
 					{
 						attr.addAttribute("Note",new Integer(1)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+					else if(Note=="16th")
+					{
+						attr.addAttribute("Note",new Integer(2)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+					else if(Note=="32th")
+					{
+						attr.addAttribute("Note",new Integer(3)); 
 						textPane.setCharacterAttributes(attr,false);
 					}
 				}
 				
 			}
 		});
-		comboBox.setBounds(496, 110, 111, 21);
+		comboBox.setBounds(35, 12, 111, 21);
 		contentPane.add(comboBox);
 		
 		JButton btnFalt = new JButton("Flat");
@@ -487,11 +251,14 @@ public class NoteEditor extends JFrame {
 					{
 						File savePath = fc.getSelectedFile();
 						FileWriter fileWriter=new FileWriter(savePath);
+						String PreNote=null;
 						for(int i=0;i<Content.size();i++)
 						{
 							if(Content.get(i)!=null)
 							{
-								fileWriter.write(Content.get(i).toString()+" ");
+								if(PreNote!=null && PreNote!="|" && Content.get(i).toString()!="|") fileWriter.write(" ");
+								fileWriter.write(Content.get(i).toString());
+								PreNote=Content.get(i).toString();
 							}
 						}
 						fileWriter.close(); 
@@ -502,10 +269,101 @@ public class NoteEditor extends JFrame {
 			}
 		});
 		btnSave.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnSave.setBounds(332, 109, 119, 23);
+		btnSave.setBounds(179, 76, 119, 23);
 		contentPane.add(btnSave);
 		
-		Content=new Vector();
+		JButton btnLoad = new JButton("Load");
+		btnLoad.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try
+				{
+					JFileChooser fc = new JFileChooser();
+					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					fc.setSelectedFile(new File("C:")); 
+					int choose=fc.showSaveDialog(NoteEditor.this);
+					if(choose == JFileChooser.APPROVE_OPTION)
+					{
+						File LoadPath = fc.getSelectedFile();
+						BufferedReader reader=new BufferedReader(new FileReader(LoadPath));;
+						String TempString;
+						FormatTransformer Transformer=new FormatTransformer();
+						while ((TempString = reader.readLine()) != null)
+						{
+							Transformer.FormatToNote(TempString,textPane.getStyledDocument());
+							System.out.println("A");
+						}
+						reader.close(); 
+					}
+					
+				}
+				catch(Exception ex){}
+			}
+		});
+		btnLoad.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnLoad.setBounds(323, 76, 119, 23);
+		contentPane.add(btnLoad);
+		
+		JComboBox comboBox_1 = new JComboBox(new Object[]{});
+		comboBox_1.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent arg0) {
+				if (arg0.getStateChange() == ItemEvent.SELECTED) 
+				{
+					String Note=arg0.getItem().toString();
+					if(Note=="None")
+					{
+						attr.addAttribute("Tune",new Integer(0)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+					else if(Note=="H")
+					{
+						attr.addAttribute("Tune",new Integer(1)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+					else if(Note=="HH")
+					{
+						attr.addAttribute("Tune",new Integer(2)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+					else if(Note=="HHH")
+					{
+						attr.addAttribute("Tune",new Integer(3)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+					else if(Note=="L")
+					{
+						attr.addAttribute("Tune",new Integer(-1)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+					else if(Note=="LL")
+					{
+						attr.addAttribute("Tune",new Integer(-2)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+					else if(Note=="LLL")
+					{
+						attr.addAttribute("Tune",new Integer(-3)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+				}
+			}
+		});
+		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"None", "H", "HH", "HHH", "L", "LL", "LLL"}));
+		comboBox_1.setSelectedIndex(0);
+		comboBox_1.setBounds(179, 12, 111, 21);
+		contentPane.add(comboBox_1);
+		
+		JButton btnRun = new JButton("Run");
+		btnRun.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MusicHandler Handler=new MusicHandler(Content);
+				Handler.Run();
+			}
+		});
+		btnRun.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnRun.setBounds(323, 109, 119, 23);
+		contentPane.add(btnRun);
+		
+
 		
 		
 
@@ -660,7 +518,7 @@ class MyLabelView extends LabelView {
         FormatTransformer Transformer=new FormatTransformer();
         if (Note!=null && Tune!=null) 
         {
-        	Vector temp=Transformer.FormatTransform(StringToTransform,(int)(4*Math.pow(2,Note.intValue())),Tune.intValue());
+        	Vector temp=Transformer.NoteTransform(StringToTransform,(int)(4*Math.pow(2,Note.intValue())),Tune.intValue());
         	int index=0;
         	for(int start=0;start<StringToTransform.length();start++)
         	{
