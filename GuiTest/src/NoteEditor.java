@@ -51,11 +51,16 @@ import javax.swing.ButtonGroup;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import javax.swing.DefaultComboBoxModel;
+import java.awt.Font;
+import java.awt.event.InputMethodListener;
+import java.awt.event.InputMethodEvent;
 
 
 
@@ -114,6 +119,9 @@ public class NoteEditor extends JFrame {
         StyleConstants.setSpaceAbove(style, 20);
         StyleConstants.setSpaceBelow(style, 10);
         StyleConstants.setLeftIndent(style, 10);
+        StyleConstants.setRightIndent(style,10);
+        StyleConstants.setFontFamily(style, "Courier New");
+        StyleConstants.setFontSize(style, 14);
         textPane.setLogicalStyle(style);
         textPane.setCaret(new DefaultCaret() {
 
@@ -190,11 +198,18 @@ public class NoteEditor extends JFrame {
 		
 		String[] Notes = {"4th","8th","16th","32th"};
 		JComboBox comboBox = new JComboBox(Notes);
+		comboBox.setModel(new DefaultComboBoxModel(new String[] {"2th", "4th", "8th", "16th", "32th"}));
+		comboBox.setSelectedIndex(1);
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				if (arg0.getStateChange() == ItemEvent.SELECTED) 
 				{
 					String Note=arg0.getItem().toString();
+					if(Note=="2th")
+					{
+						attr.addAttribute("Note",new Integer(-1)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
 					if(Note=="4th")
 					{
 						attr.addAttribute("Note",new Integer(0)); 
@@ -279,7 +294,6 @@ public class NoteEditor extends JFrame {
 				{
 					JFileChooser fc = new JFileChooser();
 					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					fc.setSelectedFile(new File("C:")); 
 					int choose=fc.showSaveDialog(NoteEditor.this);
 					if(choose == JFileChooser.APPROVE_OPTION)
 					{
@@ -290,7 +304,6 @@ public class NoteEditor extends JFrame {
 						while ((TempString = reader.readLine()) != null)
 						{
 							Transformer.FormatToNote(TempString,textPane.getStyledDocument());
-							System.out.println("A");
 						}
 						reader.close(); 
 					}
@@ -364,10 +377,7 @@ public class NoteEditor extends JFrame {
 		contentPane.add(btnRun);
 		
 
-		
-		
-
-		
+	
 		textPane.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent e) {
@@ -375,6 +385,18 @@ public class NoteEditor extends JFrame {
 				textPane.setCharacterAttributes(attr,false);
 				textPane.repaint();
 				}
+			}
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if((e.getKeyCode()>=48 && e.getKeyCode()<=57) || (e.getKeyCode()>=96 && e.getKeyCode()<=105))
+				{
+					try
+					{
+						textPane.getStyledDocument().insertString(textPane.getStyledDocument().getLength(), " ",null );
+					}
+					catch(Exception error) {}
+				}
+						
 			}
 		});
 
@@ -430,6 +452,7 @@ class MyLabelView extends LabelView {
     } 
  
     public void paintLine(Graphics g, Shape a) { 
+    	
     	Integer Note=((Integer)getElement().getAttributes().getAttribute("Note")); 
     	Integer Tune=((Integer)getElement().getAttributes().getAttribute("Tune")); 
         int End=getEndOffset();
@@ -449,10 +472,17 @@ class MyLabelView extends LabelView {
             		x1=(int) charShape.getBounds().getX(); 
             		charShape=modelToView(Start+1,a,Position.Bias.Forward);
             		x2=(int) charShape.getBounds().getX(); 
-            		for(int i=0;i<lineCount;i++)
-            		{
-                		g.drawLine(x1+1, y+2*i+1, x2-1, y+2*i+1); 
-            		}
+                    if(lineCount<0)
+                    {
+                		g.drawLine(x2, y-5,x2+5, y-5); 
+                    }
+                    else
+                    {
+                		for(int i=0;i<lineCount;i++)
+                		{
+                    		g.drawLine(x1+1, y+2*i+1, x2-1, y+2*i+1); 
+                		}
+                    }
 
              	}
             	catch(Exception e) { e.printStackTrace(); }
@@ -518,7 +548,12 @@ class MyLabelView extends LabelView {
         FormatTransformer Transformer=new FormatTransformer();
         if (Note!=null && Tune!=null) 
         {
-        	Vector temp=Transformer.NoteTransform(StringToTransform,(int)(4*Math.pow(2,Note.intValue())),Tune.intValue());
+        	Vector temp;
+        	if(Note.intValue()<0)
+        	{
+            	temp=Transformer.NoteTransform(StringToTransform,2,Tune.intValue());
+        	}
+        	else   	temp=Transformer.NoteTransform(StringToTransform,(int)(4*Math.pow(2,Note.intValue())),Tune.intValue());
         	int index=0;
         	for(int start=0;start<StringToTransform.length();start++)
         	{

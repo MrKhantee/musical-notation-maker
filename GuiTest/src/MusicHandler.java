@@ -5,7 +5,6 @@ import org.jfugue.*;
 public class MusicHandler 
 {
 	Vector MusicString;
-	final static String NoteCorrespond[]={"x","C","D","E","F","G","A","B"};
 	MusicHandler(Vector s)
 	{
 		MusicString=s;
@@ -25,8 +24,7 @@ public class MusicHandler
 				else
 				{
 					
-					song.add(NoteCorrespond[MusicString.get(i).toString().charAt(0)-'0']);
-					//System.out.println(NoteCorrespond[MusicString.get(i).toString().charAt(0)-'0']);
+					song.add(MusicString.get(i).toString());
 				}
 			}
 		}

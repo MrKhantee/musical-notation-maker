@@ -12,6 +12,7 @@ public class FormatTransformer
 	String Input;
 	int Index;
 	StyledDocument Doc;
+	final static String NoteCorrespond="XCDEFGAB";
 	FormatTransformer()
 	{
 		Output=new Vector();
@@ -24,11 +25,12 @@ public class FormatTransformer
 		char[] Input = s.toCharArray();
 		int len = s.length();
 		char [] Ans = new char[50];
-		int index = 0	;
+		int index = 0,Octave=5;
 		boolean flag = false;
 		char record = ' ';
 		for(int i=0;i<len;i++)
 		{
+			
 			if(Input[i] == 'b' || Input[i] == '#')
 			{
 				flag = true;
@@ -36,25 +38,7 @@ public class FormatTransformer
 			}
 			else if(Character.isDigit(Input[i]))
 			{
-				if(Tune>0)
-				{
-					for(int x=0;x<Tune;x++)
-					{
-						Ans[index]='.';
-						index++;
-					}
-				}
-				Ans[index] = Input[i];
-				index++;
-				if(Tune<0)
-				{
-					for(int x=0;x<Math.abs(Tune);x++)
-					{
-						Ans[index]='.';
-						index++;
-					}
-				}
-				Ans[index] = '(';
+				Ans[index] = NoteCorrespond.charAt(Input[i]-'0');
 				index++;
 				if(flag == true)
 				{
@@ -62,35 +46,32 @@ public class FormatTransformer
 					index++;
 					flag = false;
 				}
-				Ans[index] = ',';
+				Ans[index]=Character.forDigit(Octave+Tune,10);
 				index++;
 				switch(note)
 				{
+					case 2:
+						Ans[index] = 'h';
+						index++;
+						break;
 					case 4:
-						Ans[index] = '4';
+						Ans[index] = 'q';
 						index++;
 						break;
 					case 8:
-						Ans[index] = '8';
+						Ans[index] = 'i';
 						index++;
 						break;
 					case 16:
-						Ans[index] = '1';
-						index++;
-						Ans[index] = '6';
+						Ans[index] = 's';
 						index++;
 						break;
 					case 32:
-						Ans[index] = '3';
-						index++;
-						Ans[index] = '2';
+						Ans[index] = 't';
 						index++;
 						break;
 				
 				}
-				Ans[index] = ',';
-				index++;
-				Ans[index] = ')';
 				String ans=new String(Ans).trim();
 				Output.addElement(ans);
 				Ans = new char[50];
@@ -108,7 +89,7 @@ public class FormatTransformer
 		String InputSection = scanner.next();
 		while(InputSection != null)
 		{
-			if(InputSection.matches(".*\\)\\|.+")) 
+			if(InputSection.matches(".+\\|.+")) 
 			{
 				String[] tmp1 = InputSection.split("\\|");
 				String front = tmp1[0];
@@ -165,49 +146,8 @@ public class FormatTransformer
 	
 	public void process(String NoteInform)
 	{
-		String[] tmp2 = NoteInform.split("\\(");
-		String front2 = tmp2[0];
-		String back2 = tmp2[1];
 		MutableAttributeSet attr = new SimpleAttributeSet(); 
-		if(front2.matches(".[0-9]+")) 
-		{
-			attr.addAttribute("Tune",new Integer(1)); 
-		}
-		else if(front2.matches("..[0-9]+"))
-		{
-			attr.addAttribute("Tune",new Integer(2)); 
-		}
-		else if(front2.matches("...[0-9]+"))
-		{
-			attr.addAttribute("Tune",new Integer(3)); 
-		}
-		else if(front2.matches("[0-9]+."))
-		{
-			attr.addAttribute("Tune",new Integer(-1)); 
-		}
-		else if(front2.matches("[0-9]+.."))
-		{
-			attr.addAttribute("Tune",new Integer(-2)); 
-		}
-		else if(front2.matches("[0-9]+..."))
-		{
-			attr.addAttribute("Tune",new Integer(-3)); 
-		}
-		else
-		{
-			attr.addAttribute("Tune",new Integer(0)); 
-		}
-		front2 = front2.replaceAll("\\.","");
-		if(back2.matches("#.*")) 
-		{
-			try
-			{
-				Doc.insertString(Index,"#",null);
-				Index++;
-			}
-			catch(Exception ex){}
-		}
-		else if(back2.matches("b.*"))
+		if(NoteInform.matches("[A-G]+b.*"))
 		{
 			try
 			{
@@ -216,30 +156,57 @@ public class FormatTransformer
 			}
 			catch(Exception ex){}
 		}
-		String[] notion = back2.split(",");   
-		if(Integer.parseInt(notion[1])==4)
+		
+		else if(NoteInform.matches("[A-G]+#.*"))
 		{
-			attr.addAttribute("Note",new Integer(0)); 
-		}
-		else if(Integer.parseInt(notion[1])==8)
-		{
-			attr.addAttribute("Note",new Integer(1)); 
+			try
+			{
+				Doc.insertString(Index,"#",null);
+				Index++;
+			}
+			catch(Exception ex){}
 		}
 		
-		else if(Integer.parseInt(notion[1])==16)
+		if(NoteInform.matches("[A-G]+.*[1-9].*"))
 		{
-			attr.addAttribute("Note",new Integer(2)); 
+			if(Character.isDigit(NoteInform.charAt(1)))
+			{
+				attr.addAttribute("Tune",new Integer(NoteInform.charAt(1)-'5')); 
+			}
+			else
+			{
+				attr.addAttribute("Tune",new Integer(NoteInform.charAt(2)-'5')); 
+			}
 		}
 		
-		else if(Integer.parseInt(notion[1])==32)
+		if(NoteInform.matches("[A-G]+.*[h|q|i|s|t]"))
 		{
-			attr.addAttribute("Note",new Integer(3)); 
+			if(NoteInform.charAt(NoteInform.length()-1)=='h')
+			{
+				attr.addAttribute("Note",new Integer(-1)); 
+			}
+			else if(NoteInform.charAt(NoteInform.length()-1)=='q')
+			{
+				attr.addAttribute("Note",new Integer(0)); 
+			}
+			else if(NoteInform.charAt(NoteInform.length()-1)=='i')
+			{
+				attr.addAttribute("Note",new Integer(1)); 
+			}
+			else if(NoteInform.charAt(NoteInform.length()-1)=='s')
+			{
+				attr.addAttribute("Note",new Integer(2)); 
+			}
+			else if(NoteInform.charAt(NoteInform.length()-1)=='t')
+			{
+				attr.addAttribute("Note",new Integer(3)); 
+			}
 		}
 		
 		try
 		{
-			Doc.insertString(Index,front2,attr);
-			Index++;
+			Doc.insertString(Index,NoteCorrespond.indexOf(NoteInform.charAt(0))+" ",attr);
+			Index=Index+2;
 		}
 		catch(Exception ex){}
 		/*if(notion[2].matches(".+\\)"))
