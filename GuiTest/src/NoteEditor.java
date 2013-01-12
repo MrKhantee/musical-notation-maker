@@ -8,9 +8,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.BoxView;
 import javax.swing.text.ComponentView;
@@ -61,6 +63,13 @@ import javax.swing.DefaultComboBoxModel;
 import java.awt.Font;
 import java.awt.event.InputMethodListener;
 import java.awt.event.InputMethodEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.event.CaretEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JScrollBar;
+import java.awt.Component;
+import javax.swing.ScrollPaneConstants;
 
 
 
@@ -74,6 +83,7 @@ public class NoteEditor extends JFrame {
 	private JToggleButton selectedNoteButton;   //中介者
 	private JToggleButton selectedTuneButton;   //中介者
 	protected Vector Content;
+	protected Shape PreTieShape;
 
 	/**
 	 * Launch the application.
@@ -96,33 +106,60 @@ public class NoteEditor extends JFrame {
 	 */
 	public NoteEditor() {
 		Content=new Vector();
+		PreTieShape=null;
+		final MutableAttributeSet attr = new SimpleAttributeSet(); 
+        Style style=new StyleContext().new NamedStyle();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 674, 493);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setBounds(10, 166, 638, 279);
+		contentPane.add(scrollPane);
+		
 		textPane = new JTextPane();
+		textPane.addCaretListener(new CaretListener() {
+			public void caretUpdate(CaretEvent arg0) {
+			}
+		});
+		scrollPane.setViewportView(textPane);
+		textPane.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(textPane.getCaretPosition()-1>=0)
+				{
+					int preText=-1;
+					try
+					{
+						preText = textPane.getStyledDocument().getText(textPane.getCaretPosition()-1,1).charAt(0)-'0';
+						if(preText>=0 && preText<=9)
+						{
+							textPane.setCaretPosition(textPane.getCaretPosition()+1);
+						}
+					}
+					catch (Exception e) 
+					{
+						e.printStackTrace();
+					} 
+
+				}
+
+			}
+		});
+
 		textPane.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		textPane.setBounds(10, 166, 638, 279);
-		contentPane.add(textPane);
 		textPane.setEditorKit(new StyledEditorKit() { 
             public ViewFactory getViewFactory() { 
                 return new NewViewFactory(NoteEditor.this); 
 
             } 
         }); 
-		
-        StyledDocument doc = (StyledDocument) textPane.getDocument(); 
-        Style style=new StyleContext().new NamedStyle();
-        StyleConstants.setSpaceAbove(style, 20);
-        StyleConstants.setSpaceBelow(style, 10);
-        StyleConstants.setLeftIndent(style, 10);
-        StyleConstants.setRightIndent(style,10);
-        StyleConstants.setFontFamily(style, "Courier New");
-        StyleConstants.setFontSize(style, 14);
-        textPane.setLogicalStyle(style);
+        textPane.setStyledDocument(new CustomDocument());
+        
         textPane.setCaret(new DefaultCaret() {
 
             public void paint(Graphics g) {
@@ -139,18 +176,55 @@ public class NoteEditor extends JFrame {
                 } catch (BadLocationException e) {
                     return;
                 }
-                r.height = 17; //this value changes the caret size
+                r.height = 19; //this value changes the caret size
                 if (isVisible())
                     g.fillRect(r.x, r.y, 1, r.height);
             }
         });	
         textPane.getCaret().setBlinkRate(500);
+        
 
+	
+        textPane.addKeyListener(new KeyAdapter() {
+        	@Override
+        	public void keyTyped(KeyEvent e) {
+        		if(!textPane.getInputAttributes().isEqual(attr)){
+        		//textPane.getInputAttributes().addAttributes(attr);
+        		textPane.setCharacterAttributes(attr,false);
+        		textPane.repaint();
+        		}
+        		/*if(e.getKeyChar()=='\b')
+        		{
+        			textPane.setCaretPosition(textPane.getCaretPosition()-1);
+        		}*/
+        	}
+        	/*@Override
+        	public void keyReleased(KeyEvent e) {
+        		if((e.getKeyCode()>=48 && e.getKeyCode()<=57) || (e.getKeyCode()>=96 && e.getKeyCode()<=105))
+        		{
+        			try
+        			{
+        				if(textPane.getText()!=null && textPane.getText().matches(".*\\d\\/\\d.*"))
+        				textPane.getStyledDocument().insertString(textPane.getCaretPosition(), " ",null );
+        			}
+        			catch(Exception error) {}
+        		}
+        				
+        	}*/
+        });
+        StyleConstants.setSpaceAbove(style, 20);
+        StyleConstants.setSpaceBelow(style, 10);
+        StyleConstants.setLeftIndent(style, 10);
+        StyleConstants.setRightIndent(style,10);
+        StyleConstants.setFontFamily(style, "Courier New");
+        StyleConstants.setFontSize(style, 20);
+        textPane.setLogicalStyle(style);
        
-		final MutableAttributeSet attr = new SimpleAttributeSet(); 
-		attr.addAttribute("Note",new Integer(0)); 
-		attr.addAttribute("Tune",new Integer(0)); 
-		textPane.setCharacterAttributes(attr,false);
+
+		//attr.addAttribute("Note",new Integer(0)); 
+		//attr.addAttribute("Tune",new Integer(0)); 
+		//attr.addAttribute("Dot",new Integer(0)); 
+		//textPane.setCharacterAttributes(attr,false);
 		
 		JButton tglbtnSave = new JButton("Save As img");
 		tglbtnSave.addActionListener(new ActionListener() {
@@ -198,16 +272,22 @@ public class NoteEditor extends JFrame {
 		
 		String[] Notes = {"4th","8th","16th","32th"};
 		JComboBox comboBox = new JComboBox(Notes);
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"2th", "4th", "8th", "16th", "32th"}));
-		comboBox.setSelectedIndex(1);
+		comboBox.setModel(new DefaultComboBoxModel(new String[] {"1th", "2th", "4th", "8th", "16th", "32th"}));
+		comboBox.setSelectedIndex(2);
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				if (arg0.getStateChange() == ItemEvent.SELECTED) 
 				{
 					String Note=arg0.getItem().toString();
+					if(Note=="1th")
+					{
+						attr.addAttribute("Note",new Integer(-2)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
 					if(Note=="2th")
 					{
 						attr.addAttribute("Note",new Integer(-1)); 
+						
 						textPane.setCharacterAttributes(attr,false);
 					}
 					if(Note=="4th")
@@ -267,12 +347,12 @@ public class NoteEditor extends JFrame {
 						File savePath = fc.getSelectedFile();
 						FileWriter fileWriter=new FileWriter(savePath);
 						String PreNote=null;
-						for(int i=0;i<Content.size();i++)
+						for(int i=0;i<textPane.getText().length();i++)
 						{
 							if(Content.get(i)!=null)
 							{
-								if(PreNote!=null && PreNote!="|" && Content.get(i).toString()!="|") fileWriter.write(" ");
-								fileWriter.write(Content.get(i).toString());
+								if(PreNote!=null && PreNote.matches("[A-G|R].*")) fileWriter.write(" ");
+								if(Content.get(i).toString().matches("[A-G|R|\\|].*")) fileWriter.write(Content.get(i).toString());
 								PreNote=Content.get(i).toString();
 							}
 						}
@@ -376,29 +456,46 @@ public class NoteEditor extends JFrame {
 		btnRun.setBounds(323, 109, 119, 23);
 		contentPane.add(btnRun);
 		
-
-	
-		textPane.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyTyped(KeyEvent e) {
-				if(textPane.getInputAttributes()!=attr){
-				textPane.setCharacterAttributes(attr,false);
-				textPane.repaint();
-				}
-			}
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if((e.getKeyCode()>=48 && e.getKeyCode()<=57) || (e.getKeyCode()>=96 && e.getKeyCode()<=105))
-				{
-					try
-					{
-						textPane.getStyledDocument().insertString(textPane.getStyledDocument().getLength(), " ",null );
-					}
-					catch(Exception error) {}
-				}
-						
+		JToggleButton tglbtnNewToggleButton = new JToggleButton("Dot");
+		tglbtnNewToggleButton.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent arg0) {
+				int state = arg0.getStateChange();
+			    if (state == ItemEvent.SELECTED) 
+			    {
+			    	attr.addAttribute("Dot",new Integer(1)); 
+			    	textPane.setCharacterAttributes(attr,false);
+			    }
+			    else
+			    {
+			    	attr.addAttribute("Dot",new Integer(0)); 
+			    	textPane.setCharacterAttributes(attr,false);
+			    }
 			}
 		});
+
+		tglbtnNewToggleButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		tglbtnNewToggleButton.setBounds(323, 11, 119, 23);
+		contentPane.add(tglbtnNewToggleButton);
+		
+		/*JButton btnTie = new JButton("Tie");
+		btnTie.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(textPane.getSelectedText()!=null)
+				{
+					String s=textPane.getSelectedText();
+					if(textPane.getSelectedText().matches("[^1-7]*[1-7][^1-7]*[1-7][^1-7]*"))
+					{
+				    	attr.addAttribute("Tie",new Integer(1)); 
+				    	textPane.getStyledDocument().setCharacterAttributes(textPane.getSelectionStart(), s.length(), attr,false);
+				    	
+				    	//textPane.setCharacterAttributes(attr,false);
+					}
+				}
+			}
+		});*/
+		/*btnTie.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnTie.setBounds(452, 76, 119, 23);
+		contentPane.add(btnTie);*/
 
 				
 	}
@@ -455,28 +552,83 @@ class MyLabelView extends LabelView {
     	
     	Integer Note=((Integer)getElement().getAttributes().getAttribute("Note")); 
     	Integer Tune=((Integer)getElement().getAttributes().getAttribute("Tune")); 
+    	Integer Dot=((Integer)getElement().getAttributes().getAttribute("Dot")); 
+    	//Integer Tie=((Integer)getElement().getAttributes().getAttribute("Tie")); 
         int End=getEndOffset();
         Shape charShape=null;
-        int x1=0,x2=0;
+        int x1=0,x2=0,lineCount=0,tuneCount=0,dotCount=0,tieCount=0;
+
+        /*if(Tie!=null && Tie.intValue()>0)
+        {
+            for(int Start=getStartOffset();Start+1<=End;Start++)
+            {
+            	try
+            	{
+            		String charToDraw=getText(Start,Start+1).toString();
+            		if(!charToDraw.matches("[1-7]+")) continue;
+            		charShape=modelToView(Start,a,Position.Bias.Forward);
+            		if(Editor.PreTieShape==null)
+            		{
+            			Editor.PreTieShape=charShape;
+            		}
+            		else
+            		{
+            			g.drawArc(Editor.PreTieShape.getBounds().x+7, Editor.PreTieShape.getBounds().y-15, charShape.getBounds().x-Editor.PreTieShape.getBounds().x-2,charShape.getBounds().height-15,0,180);
+            			//g.drawLine(Editor.PreTieShape.getBounds().x, Editor.PreTieShape.getBounds().y, charShape.getBounds().x, charShape.getBounds().y);
+            			Editor.PreTieShape=null;
+            		}
+             	}
+            	catch(Exception e) { e.printStackTrace(); }
+            	
+            }
+        }*/
+        
+        if(Dot!=null && Dot.intValue()>0)
+        {
+        	int y = a.getBounds().y + a.getBounds().height - (int) getGlyphPainter().getDescent(this); 
+            for(int Start=getStartOffset();Start+1<=End;Start++)
+            {
+            	try
+            	{
+            		String charToDraw=getText(Start,Start+1).toString();
+            		if(!charToDraw.matches("[1-7]+")) continue;
+            		charShape=modelToView(Start,a,Position.Bias.Forward);
+            		x1=(int) charShape.getBounds().getX(); 
+            		charShape=modelToView(Start+1,a,Position.Bias.Forward);
+            		x2=(int) charShape.getBounds().getX(); 
+            		g.fillOval(x2,y,3,3);
+
+             	}
+            	catch(Exception e) { e.printStackTrace(); }
+            	
+            }
+        }
+        
         if (Note!=null) { 
             int y = a.getBounds().y + a.getBounds().height - (int) getGlyphPainter().getDescent(this); 
-            int lineCount=Note.intValue();
+            lineCount=Note.intValue();
             //y = y - (int) (getGlyphPainter().getAscent(this) * 0.3f); 
             for(int Start=getStartOffset();Start+1<=End;Start++)
             {
             	try
             	{
             		String charToDraw=getText(Start,Start+1).toString();
-            		if(!charToDraw.matches("[0-9]+")) continue;
+            		if(!charToDraw.matches("[1-7]+")) continue;
             		charShape=modelToView(Start,a,Position.Bias.Forward);
             		x1=(int) charShape.getBounds().getX(); 
             		charShape=modelToView(Start+1,a,Position.Bias.Forward);
             		x2=(int) charShape.getBounds().getX(); 
                     if(lineCount<0)
                     {
-                		g.drawLine(x2, y-5,x2+5, y-5); 
+                		if(lineCount==-1)g.drawLine(x2, y-5,x2+5, y-5); 
+                		else
+                		{
+                			g.drawLine(x2, y-5,x2+1, y-5); 
+                			g.drawLine(x2+3, y-5,x2+4, y-5); 
+                			g.drawLine(x2+6, y-5,x2+7, y-5); 
+                		}
                     }
-                    else
+                    else if(lineCount>0)
                     {
                 		for(int i=0;i<lineCount;i++)
                 		{
@@ -492,8 +644,8 @@ class MyLabelView extends LabelView {
         
         
         if (Tune!=null) { 
-            int DotCount=Tune.intValue();
-            if(DotCount>0)
+            tuneCount=Tune.intValue();
+            if(tuneCount>0)
             {
             	int y = a.getBounds().y + a.getBounds().height; 
             	y = y - (int) (getGlyphPainter().getAscent(this)); 
@@ -502,14 +654,14 @@ class MyLabelView extends LabelView {
             		try
             		{
             			String charToDraw=getText(Start,Start+1).toString();
-            			if(!charToDraw.matches("[0-9]+")) continue;
+            			if(!charToDraw.matches("[1-7]+")) continue;
             			charShape=modelToView(Start,a,Position.Bias.Forward);
             			x1=(int) charShape.getBounds().getX(); 
             			charShape=modelToView(Start+1,a,Position.Bias.Forward);
             			x2=(int) charShape.getBounds().getX(); 
-            			for(int i=0;i<DotCount;i++)
+            			for(int i=0;i<tuneCount;i++)
             			{
-            				g.fillOval(x1+1, y-3*i-5, 3,3);
+            				g.fillOval(x1+3, y-3*i-7, 3,3);
             			}
 
             		}
@@ -519,68 +671,66 @@ class MyLabelView extends LabelView {
             }
             else
             {
-            	DotCount=Math.abs(DotCount);
-            	int lineCount;
-            	lineCount=Note.intValue();
+            	tuneCount=Math.abs(tuneCount);
             	int y = a.getBounds().y + a.getBounds().height - (int) getGlyphPainter().getDescent(this); 
             	for(int Start=getStartOffset();Start+1<=End;Start++)
             	{
             		try
             		{
             			String charToDraw=getText(Start,Start+1).toString();
-            			if(!charToDraw.matches("[0-9]+")) continue;
+            			if(!charToDraw.matches("[1-7]+")) continue;
             			charShape=modelToView(Start,a,Position.Bias.Forward);
             			x1=(int) charShape.getBounds().getX(); 
             			charShape=modelToView(Start+1,a,Position.Bias.Forward);
             			x2=(int) charShape.getBounds().getX(); 
-            			for(int i=0;i<DotCount;i++)
+            			for(int i=0;i<tuneCount;i++)
             			{
-            				g.fillOval(x1+1, y+3*i+1+(2*lineCount+1), 3,3);
+            				g.fillOval(x1+3, y+3*i+1+(2*lineCount+1), 3,3);
             			}
 
             		}
             	catch(Exception e) { e.printStackTrace(); }
             	
             	}
+            	tuneCount=Tune.intValue();
             }
         }
         String StringToTransform=getText(getStartOffset(),getEndOffset()).toString();
         FormatTransformer Transformer=new FormatTransformer();
-        if (Note!=null && Tune!=null) 
-        {
-        	Vector temp;
-        	if(Note.intValue()<0)
-        	{
-            	temp=Transformer.NoteTransform(StringToTransform,2,Tune.intValue());
-        	}
-        	else   	temp=Transformer.NoteTransform(StringToTransform,(int)(4*Math.pow(2,Note.intValue())),Tune.intValue());
-        	int index=0;
-        	for(int start=0;start<StringToTransform.length();start++)
-        	{
-        		if(StringToTransform.charAt(start)=='|')
-        		{
-        			if(getStartOffset()+start>=Editor.Content.size())
-        			{
-        				Editor.Content.setSize(Editor.Content.size()+10);
-        			}
-        			Editor.Content.setElementAt("|",getStartOffset()+start);
-        		}
-        		
-        		if(Character.isDigit(StringToTransform.charAt(start)))
-        		{
-        			if(getStartOffset()+start>=Editor.Content.size())
-        			{
-        				Editor.Content.setSize(Editor.Content.size()+10);
-        			}
-        			Editor.Content.setElementAt(temp.get(index),getStartOffset()+start);
-        			index++;
-        		}
-        	}
-        	
-            
-        }
-
+    	Vector temp;
+    	if(lineCount<0)
+    	{
+        	if(lineCount==-1)	temp=Transformer.NoteTransform(StringToTransform,2,tuneCount,dotCount);
+        	else temp=Transformer.NoteTransform(StringToTransform,1,tuneCount,dotCount);
+    	}
+    	else   	temp=Transformer.NoteTransform(StringToTransform,(int)(4*Math.pow(2,lineCount)),tuneCount,dotCount);
+    	int index=0;
+    	for(int start=0;start<StringToTransform.length();start++)
+    	{
+    			if(getStartOffset()+start>=Editor.Content.size())
+    			{
+    				Editor.Content.setSize(Editor.Content.size()+10);
+    			}
+    			Editor.Content.setElementAt(temp.get(index),getStartOffset()+start);
+    			index++;
+    	}
 
         
     } 
 } 
+
+
+class CustomDocument extends DefaultStyledDocument {
+    @Override
+    public void insertString(int offset, String string, AttributeSet attributeSet)
+            throws BadLocationException {
+        if(Character.isDigit(string.charAt(0)))
+        {
+            super.insertString(offset, string+" ", attributeSet);
+        }
+        else
+        {
+        	super.insertString(offset, string, attributeSet);
+        }
+    }
+}

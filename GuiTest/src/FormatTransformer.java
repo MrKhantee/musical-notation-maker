@@ -12,16 +12,16 @@ public class FormatTransformer
 	String Input;
 	int Index;
 	StyledDocument Doc;
-	final static String NoteCorrespond="XCDEFGAB";
+	final static String NoteCorrespond="RCDEFGAB89";
 	FormatTransformer()
 	{
-		Output=new Vector();
 		Index=0;
 	}
 
-	Vector NoteTransform(String s,int note,int Tune)
+	Vector NoteTransform(String s,int note,int Tune,int Dot)
 	{
 		//String input = s;
+		Output=new Vector();
 		char[] Input = s.toCharArray();
 		int len = s.length();
 		char [] Ans = new char[50];
@@ -35,9 +35,21 @@ public class FormatTransformer
 			{
 				flag = true;
 				record = Input[i];
+				Ans[index]=Input[i];
+				index++;
 			}
-			else if(Character.isDigit(Input[i]))
+			else if((Input[i]-'0')>=0 && (Input[i]-'0')<=7)
 			{
+				if(Input[i]=='0')
+				{
+					Ans[index]='R';
+					index++;
+					String ans=new String(Ans).trim();
+					Output.addElement(ans);
+					Ans = new char[50];
+					index = 0;
+					continue;
+				}
 				Ans[index] = NoteCorrespond.charAt(Input[i]-'0');
 				index++;
 				if(flag == true)
@@ -50,6 +62,10 @@ public class FormatTransformer
 				index++;
 				switch(note)
 				{
+					case 1:
+						Ans[index] = 'w';
+						index++;
+					break;
 					case 2:
 						Ans[index] = 'h';
 						index++;
@@ -72,11 +88,21 @@ public class FormatTransformer
 						break;
 				
 				}
-				String ans=new String(Ans).trim();
-				Output.addElement(ans);
-				Ans = new char[50];
-				index = 0;
+				if(Dot>0)
+				{
+					Ans[index] = '.';
+					index++;
+				}
 			}
+			else
+			{
+				Ans[index]=Input[i];
+				index++;
+			}
+			String ans=new String(Ans).trim();
+			Output.addElement(ans);
+			Ans = new char[50];
+			index = 0;
 		}
 		return Output;
 	}
@@ -95,35 +121,26 @@ public class FormatTransformer
 				String front = tmp1[0];
 				String back = tmp1[1];
 				process(front);
-				try
+				/*try
 				{
 					Doc.insertString(Index,"|",null);
 					Index++;
 				}
-				catch(Exception ex){}
+				catch(Exception ex){}*/
+				process("|");
 				process(back);
 			}
 			else if(InputSection.matches("\\|.*"))//BEGIN
 			{
 				InputSection = InputSection.replaceAll("\\|","");
-				try
-				{
-					Doc.insertString(Index,"|",null);
-					Index++;
-				}
-				catch(Exception ex){}
+				process("|");
 				process(InputSection);
 			}
 			else if(InputSection.matches(".*\\|.*"))//END
 			{
 				InputSection = InputSection.replaceAll("\\|","");
 				process(InputSection);
-				try
-				{
-					Doc.insertString(Index,"|",null);
-					Index++;
-				}
-				catch(Exception ex){}
+				process("|");
 			}
 			else
 			{
@@ -147,6 +164,16 @@ public class FormatTransformer
 	public void process(String NoteInform)
 	{
 		MutableAttributeSet attr = new SimpleAttributeSet(); 
+		if(NoteInform=="|")
+		{
+			try
+			{
+				Doc.insertString(Index,"|",null);
+				Index=Index+1;
+			}
+			catch(Exception ex){}
+			return;
+		}
 		if(NoteInform.matches("[A-G]+b.*"))
 		{
 			try
@@ -179,25 +206,38 @@ public class FormatTransformer
 			}
 		}
 		
-		if(NoteInform.matches("[A-G]+.*[h|q|i|s|t]"))
+		if(NoteInform.matches("[A-G]+.*[w|h|q|i|s|t]\\.?"))
 		{
-			if(NoteInform.charAt(NoteInform.length()-1)=='h')
+			if(NoteInform.indexOf('.')>0)
+				attr.addAttribute("Dot",new Integer(1)); 
+			else
+				attr.addAttribute("Dot",new Integer(0)); 
+			if(NoteInform.indexOf('w')>0)
+			{
+				attr.addAttribute("Note",new Integer(-2)); 
+			}
+			if(NoteInform.indexOf('h')>0)
 			{
 				attr.addAttribute("Note",new Integer(-1)); 
 			}
-			else if(NoteInform.charAt(NoteInform.length()-1)=='q')
+
+			
+			if(NoteInform.indexOf('q')>0)
 			{
 				attr.addAttribute("Note",new Integer(0)); 
 			}
-			else if(NoteInform.charAt(NoteInform.length()-1)=='i')
+			
+			if(NoteInform.indexOf('i')>0)
 			{
 				attr.addAttribute("Note",new Integer(1)); 
 			}
-			else if(NoteInform.charAt(NoteInform.length()-1)=='s')
+			
+			if(NoteInform.indexOf('s')>0)
 			{
 				attr.addAttribute("Note",new Integer(2)); 
 			}
-			else if(NoteInform.charAt(NoteInform.length()-1)=='t')
+			
+			if(NoteInform.indexOf('t')>0)
 			{
 				attr.addAttribute("Note",new Integer(3)); 
 			}

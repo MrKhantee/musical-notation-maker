@@ -12,6 +12,7 @@ public class MusicHandler
 	public void Run()
 	{
 		Pattern song=new Pattern();
+		song.add("I24");
 		Player player = new Player();
 		for(int i=0;i<MusicString.size();i++)
 		{
