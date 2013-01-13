@@ -70,6 +70,10 @@ import java.awt.event.MouseEvent;
 import javax.swing.JScrollBar;
 import java.awt.Component;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 
 
@@ -82,6 +86,7 @@ public class NoteEditor extends JFrame {
 	private final ButtonGroup buttonGroup_1 = new ButtonGroup();
 	private JToggleButton selectedNoteButton;   //中介者
 	private JToggleButton selectedTuneButton;   //中介者
+	private JScrollPane scrollPane;
 	protected Vector Content;
 	protected Shape PreTieShape;
 
@@ -105,20 +110,112 @@ public class NoteEditor extends JFrame {
 	 * Create the frame.
 	 */
 	public NoteEditor() {
+		setTitle("簡譜編輯器");
 		Content=new Vector();
 		PreTieShape=null;
 		final MutableAttributeSet attr = new SimpleAttributeSet(); 
         Style style=new StyleContext().new NamedStyle();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 674, 493);
+		
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		
+		JMenu mnNewMenu = new JMenu("File");
+		mnNewMenu.setFont(new Font("新細明體", Font.PLAIN, 15));
+		menuBar.add(mnNewMenu);
+		
+		JMenuItem mntmNewMenuItem = new JMenuItem("Load");
+		mntmNewMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try
+				{
+					JFileChooser fc = new JFileChooser();
+					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					int choose=fc.showSaveDialog(NoteEditor.this);
+					if(choose == JFileChooser.APPROVE_OPTION)
+					{
+						File LoadPath = fc.getSelectedFile();
+						BufferedReader reader=new BufferedReader(new FileReader(LoadPath));;
+						String TempString;
+						FormatTransformer Transformer=new FormatTransformer();
+						while ((TempString = reader.readLine()) != null)
+						{
+							Transformer.FormatToNote(TempString,textPane.getStyledDocument());
+						}
+						reader.close(); 
+					}
+					
+				}
+				catch(Exception ex){}
+			}
+		});
+		mnNewMenu.add(mntmNewMenuItem);
+		
+		JMenuItem mntmNewMenuItem_2 = new JMenuItem("Save as img");
+		mntmNewMenuItem_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try
+				{
+					JFileChooser fc = new JFileChooser();
+					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					fc.setSelectedFile(new File("C:\\*.jpg")); 
+					int choose=fc.showSaveDialog(NoteEditor.this);
+					if(choose == JFileChooser.APPROVE_OPTION)
+					{
+						File savePath = fc.getSelectedFile();
+						Rectangle textRec=scrollPane.getBounds();
+						Point textRecXY=new Point(textRec.x,textRec.y);
+						Point textRecWH=new Point(textRec.width,textRec.height);
+						SwingUtilities.convertPointToScreen(textRecXY,contentPane);
+						textRec.setBounds(textRecXY.x,textRecXY.y,textRecWH.x,textRecWH.y);
+						BufferedImage bi = new Robot().createScreenCapture(textRec);
+			            ImageIO.write(bi, "jpg",savePath);
+					}
+				}
+				catch(Exception ex){}
+			}
+		});
+		mnNewMenu.add(mntmNewMenuItem_2);
+		
+		JMenuItem mntmNewMenuItem_1 = new JMenuItem("Save");
+		mntmNewMenuItem_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try
+				{
+					JFileChooser fc = new JFileChooser();
+					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					fc.setSelectedFile(new File("C:\\*.song")); 
+					int choose=fc.showSaveDialog(NoteEditor.this);
+					if(choose == JFileChooser.APPROVE_OPTION)
+					{
+						File savePath = fc.getSelectedFile();
+						FileWriter fileWriter=new FileWriter(savePath);
+						String PreNote=null;
+						for(int i=0;i<textPane.getText().length();i++)
+						{
+							if(Content.get(i)!=null)
+							{
+								if(PreNote!=null && PreNote.matches("[A-G|R].*")) fileWriter.write(" ");
+								if(Content.get(i).toString().matches("[A-G|R|\\|].*")) fileWriter.write(Content.get(i).toString());
+								PreNote=Content.get(i).toString();
+							}
+						}
+						fileWriter.close(); 
+					}
+					
+				}
+				catch(Exception ex){}
+			}
+		});
+		mnNewMenu.add(mntmNewMenuItem_1);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setBounds(10, 166, 638, 279);
+		scrollPane = new JScrollPane();
+		scrollPane.setBounds(10, 118, 638, 293);
 		contentPane.add(scrollPane);
 		
 		textPane = new JTextPane();
@@ -136,7 +233,7 @@ public class NoteEditor extends JFrame {
 					try
 					{
 						preText = textPane.getStyledDocument().getText(textPane.getCaretPosition()-1,1).charAt(0)-'0';
-						if(preText>=0 && preText<=9)
+						if(preText>=0 && preText<=7)
 						{
 							textPane.setCaretPosition(textPane.getCaretPosition()+1);
 						}
@@ -219,41 +316,6 @@ public class NoteEditor extends JFrame {
         StyleConstants.setFontFamily(style, "Courier New");
         StyleConstants.setFontSize(style, 20);
         textPane.setLogicalStyle(style);
-       
-
-		//attr.addAttribute("Note",new Integer(0)); 
-		//attr.addAttribute("Tune",new Integer(0)); 
-		//attr.addAttribute("Dot",new Integer(0)); 
-		//textPane.setCharacterAttributes(attr,false);
-		
-		JButton tglbtnSave = new JButton("Save As img");
-		tglbtnSave.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try
-				{
-					JFileChooser fc = new JFileChooser();
-					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					fc.setSelectedFile(new File("C:\\*.jpg")); 
-					int choose=fc.showSaveDialog(NoteEditor.this);
-					if(choose == JFileChooser.APPROVE_OPTION)
-					{
-						File savePath = fc.getSelectedFile();
-						Rectangle textRec=textPane.getBounds();
-						Point textRecXY=new Point(textRec.x,textRec.y);
-						Point textRecWH=new Point(textRec.width,textRec.height);
-						SwingUtilities.convertPointToScreen(textRecXY,contentPane);
-						textRec.setBounds(textRecXY.x,textRecXY.y,textRecWH.x,textRecWH.y);
-						BufferedImage bi = new Robot().createScreenCapture(textRec);
-			            ImageIO.write(bi, "jpg",savePath);
-					}
-				}
-				catch(Exception ex){}
-				
-			}
-		});
-		tglbtnSave.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnSave.setBounds(35, 76, 119, 23);
-		contentPane.add(tglbtnSave);
 		
 		JButton btnSharp = new JButton("Sharp");
 		btnSharp.addActionListener(new ActionListener() {
@@ -267,7 +329,7 @@ public class NoteEditor extends JFrame {
 			}
 		});
 		btnSharp.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnSharp.setBounds(35, 109, 119, 23);
+		btnSharp.setBounds(40, 52, 119, 23);
 		contentPane.add(btnSharp);
 		
 		String[] Notes = {"4th","8th","16th","32th"};
@@ -314,7 +376,7 @@ public class NoteEditor extends JFrame {
 				
 			}
 		});
-		comboBox.setBounds(35, 12, 111, 21);
+		comboBox.setBounds(90, 21, 111, 21);
 		contentPane.add(comboBox);
 		
 		JButton btnFalt = new JButton("Flat");
@@ -330,71 +392,8 @@ public class NoteEditor extends JFrame {
 			}
 		});
 		btnFalt.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnFalt.setBounds(179, 109, 119, 23);
+		btnFalt.setBounds(169, 52, 119, 23);
 		contentPane.add(btnFalt);
-		
-		JButton btnSave = new JButton("Save");
-		btnSave.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				try
-				{
-					JFileChooser fc = new JFileChooser();
-					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					fc.setSelectedFile(new File("C:\\*.song")); 
-					int choose=fc.showSaveDialog(NoteEditor.this);
-					if(choose == JFileChooser.APPROVE_OPTION)
-					{
-						File savePath = fc.getSelectedFile();
-						FileWriter fileWriter=new FileWriter(savePath);
-						String PreNote=null;
-						for(int i=0;i<textPane.getText().length();i++)
-						{
-							if(Content.get(i)!=null)
-							{
-								if(PreNote!=null && PreNote.matches("[A-G|R].*")) fileWriter.write(" ");
-								if(Content.get(i).toString().matches("[A-G|R|\\|].*")) fileWriter.write(Content.get(i).toString());
-								PreNote=Content.get(i).toString();
-							}
-						}
-						fileWriter.close(); 
-					}
-					
-				}
-				catch(Exception ex){}
-			}
-		});
-		btnSave.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnSave.setBounds(179, 76, 119, 23);
-		contentPane.add(btnSave);
-		
-		JButton btnLoad = new JButton("Load");
-		btnLoad.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				try
-				{
-					JFileChooser fc = new JFileChooser();
-					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					int choose=fc.showSaveDialog(NoteEditor.this);
-					if(choose == JFileChooser.APPROVE_OPTION)
-					{
-						File LoadPath = fc.getSelectedFile();
-						BufferedReader reader=new BufferedReader(new FileReader(LoadPath));;
-						String TempString;
-						FormatTransformer Transformer=new FormatTransformer();
-						while ((TempString = reader.readLine()) != null)
-						{
-							Transformer.FormatToNote(TempString,textPane.getStyledDocument());
-						}
-						reader.close(); 
-					}
-					
-				}
-				catch(Exception ex){}
-			}
-		});
-		btnLoad.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnLoad.setBounds(323, 76, 119, 23);
-		contentPane.add(btnLoad);
 		
 		JComboBox comboBox_1 = new JComboBox(new Object[]{});
 		comboBox_1.addItemListener(new ItemListener() {
@@ -442,7 +441,7 @@ public class NoteEditor extends JFrame {
 		});
 		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"None", "H", "HH", "HHH", "L", "LL", "LLL"}));
 		comboBox_1.setSelectedIndex(0);
-		comboBox_1.setBounds(179, 12, 111, 21);
+		comboBox_1.setBounds(226, 21, 111, 21);
 		contentPane.add(comboBox_1);
 		
 		JButton btnRun = new JButton("Run");
@@ -453,7 +452,7 @@ public class NoteEditor extends JFrame {
 			}
 		});
 		btnRun.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnRun.setBounds(323, 109, 119, 23);
+		btnRun.setBounds(310, 52, 119, 23);
 		contentPane.add(btnRun);
 		
 		JToggleButton tglbtnNewToggleButton = new JToggleButton("Dot");
@@ -474,8 +473,13 @@ public class NoteEditor extends JFrame {
 		});
 
 		tglbtnNewToggleButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnNewToggleButton.setBounds(323, 11, 119, 23);
+		tglbtnNewToggleButton.setBounds(453, 52, 119, 23);
 		contentPane.add(tglbtnNewToggleButton);
+		
+		JLabel lblNewLabel = new JLabel("音符:");
+		lblNewLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+		lblNewLabel.setBounds(35, 21, 39, 15);
+		contentPane.add(lblNewLabel);
 		
 		/*JButton btnTie = new JButton("Tie");
 		btnTie.addActionListener(new ActionListener() {
@@ -496,7 +500,16 @@ public class NoteEditor extends JFrame {
 		/*btnTie.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		btnTie.setBounds(452, 76, 119, 23);
 		contentPane.add(btnTie);*/
-
+		textPane.getStyledDocument().addDocumentListener(new DocumentListener(){
+		      public void changedUpdate(DocumentEvent documentEvent) {
+		        }
+		      public void insertUpdate(DocumentEvent documentEvent) {
+	        }
+	        public void removeUpdate(DocumentEvent documentEvent) {
+	        	int a=0;
+	        }
+			
+		});
 				
 	}
 }
@@ -724,7 +737,22 @@ class CustomDocument extends DefaultStyledDocument {
     @Override
     public void insertString(int offset, String string, AttributeSet attributeSet)
             throws BadLocationException {
-        if(Character.isDigit(string.charAt(0)))
+    	if(offset-1>=0)
+    	{
+    		if(Character.isDigit(this.getText(offset-1,1).charAt(0)) && Character.isDigit(string.charAt(0)))
+    		{
+    			super.insertString(offset," "+string+" ", attributeSet);
+    		}
+    		else if(Character.isDigit(string.charAt(0)))
+    		{
+    			super.insertString(offset, string+" ", attributeSet);
+    		}
+            else
+            {
+            	super.insertString(offset, string, attributeSet);
+            }
+    	}
+    	else if(Character.isDigit(string.charAt(0)))
         {
             super.insertString(offset, string+" ", attributeSet);
         }
