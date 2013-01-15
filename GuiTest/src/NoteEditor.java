@@ -92,8 +92,6 @@ public class NoteEditor extends JFrame {
 
 	private JPanel contentPane;
 	private JTextPane textPane;
-	private JToggleButton selectedNoteButton;   //中介者
-	private JToggleButton selectedTuneButton;   //中介者
 	private JScrollPane scrollPane;
 	protected Vector Content;
 	protected Shape PreTieShape;
@@ -147,9 +145,8 @@ public class NoteEditor extends JFrame {
 				try
 				{
 					JFileChooser fc = new JFileChooser();
-					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 					fc.setSelectedFile(new File("C:\\*.song")); 
-					int choose=fc.showSaveDialog(NoteEditor.this);
+					int choose=fc.showOpenDialog(NoteEditor.this);
 					int timeFlag=0;
 					if(choose == JFileChooser.APPROVE_OPTION)
 					{
@@ -182,7 +179,6 @@ public class NoteEditor extends JFrame {
 				try
 				{
 					JFileChooser fc = new JFileChooser();
-					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 					fc.setSelectedFile(new File("C:\\*.jpg")); 
 					int choose=fc.showSaveDialog(NoteEditor.this);
 					if(choose == JFileChooser.APPROVE_OPTION)
@@ -208,7 +204,6 @@ public class NoteEditor extends JFrame {
 				try
 				{
 					JFileChooser fc = new JFileChooser();
-					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 					fc.setSelectedFile(new File("C:\\*.song")); 
 					int choose=fc.showSaveDialog(NoteEditor.this);
 					if(choose == JFileChooser.APPROVE_OPTION)
@@ -254,7 +249,6 @@ public class NoteEditor extends JFrame {
 			    if(textPane.getSelectedText()!=null)
 			    {
 			    	textPane.setCharacterAttributes(attr, false);
-			    	//textPane.getStyledDocument().setCharacterAttributes(textPane.getSelectionStart(), textPane.getSelectionEnd()-textPane.getSelectionStart(),attr,false);
 			    	textPane.repaint();
 			    }
 			}
@@ -297,7 +291,7 @@ public class NoteEditor extends JFrame {
                 } catch (BadLocationException e) {
                     return;
                 }
-                r.height = 19; //this value changes the caret size
+                r.height = 19; 
                 if (isVisible())
                     g.fillRect(r.x, r.y, 1, r.height);
             }
@@ -310,7 +304,6 @@ public class NoteEditor extends JFrame {
         	@Override
         	public void keyTyped(KeyEvent e) {
         		if(!textPane.getInputAttributes().isEqual(attr)){
-        		//textPane.getInputAttributes().addAttributes(attr);
         		textPane.setCharacterAttributes(attr,false);
         		textPane.repaint();
         		}
@@ -556,25 +549,6 @@ public class NoteEditor extends JFrame {
 			}
 		});
 		
-		/*JButton btnTie = new JButton("Tie");
-		btnTie.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if(textPane.getSelectedText()!=null)
-				{
-					String s=textPane.getSelectedText();
-					if(textPane.getSelectedText().matches("[^1-7]*[1-7][^1-7]*[1-7][^1-7]*"))
-					{
-				    	attr.addAttribute("Tie",new Integer(1)); 
-				    	textPane.getStyledDocument().setCharacterAttributes(textPane.getSelectionStart(), s.length(), attr,false);
-				    	
-				    	//textPane.setCharacterAttributes(attr,false);
-					}
-				}
-			}
-		});*/
-		/*btnTie.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnTie.setBounds(452, 76, 119, 23);
-		contentPane.add(btnTie);*/
 				
 	}
 }
@@ -631,35 +605,10 @@ class MyLabelView extends LabelView {
     	Integer Note=((Integer)getElement().getAttributes().getAttribute("Note")); 
     	Integer Tune=((Integer)getElement().getAttributes().getAttribute("Tune")); 
     	Integer Dot=((Integer)getElement().getAttributes().getAttribute("Dot")); 
-    	//Integer Tie=((Integer)getElement().getAttributes().getAttribute("Tie")); 
         int End=getEndOffset();
         Shape charShape=null;
         int x1=0,x2=0,lineCount=0,tuneCount=0,dotCount=0,tieCount=0;
 
-        /*if(Tie!=null && Tie.intValue()>0)
-        {
-            for(int Start=getStartOffset();Start+1<=End;Start++)
-            {
-            	try
-            	{
-            		String charToDraw=getText(Start,Start+1).toString();
-            		if(!charToDraw.matches("[1-7]+")) continue;
-            		charShape=modelToView(Start,a,Position.Bias.Forward);
-            		if(Editor.PreTieShape==null)
-            		{
-            			Editor.PreTieShape=charShape;
-            		}
-            		else
-            		{
-            			g.drawArc(Editor.PreTieShape.getBounds().x+7, Editor.PreTieShape.getBounds().y-15, charShape.getBounds().x-Editor.PreTieShape.getBounds().x-2,charShape.getBounds().height-15,0,180);
-            			//g.drawLine(Editor.PreTieShape.getBounds().x, Editor.PreTieShape.getBounds().y, charShape.getBounds().x, charShape.getBounds().y);
-            			Editor.PreTieShape=null;
-            		}
-             	}
-            	catch(Exception e) { e.printStackTrace(); }
-            	
-            }
-        }*/
         
         if(Dot!=null && Dot.intValue()>0)
         {
@@ -685,7 +634,6 @@ class MyLabelView extends LabelView {
         if (Note!=null) { 
             int y = a.getBounds().y + a.getBounds().height - (int) getGlyphPainter().getDescent(this); 
             lineCount=Note.intValue();
-            //y = y - (int) (getGlyphPainter().getAscent(this) * 0.3f); 
             for(int Start=getStartOffset();Start+1<=End;Start++)
             {
             	try

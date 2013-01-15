@@ -121,12 +121,6 @@ public class FormatTransformer
 				String front = tmp1[0];
 				String back = tmp1[1];
 				process(front);
-				/*try
-				{
-					Doc.insertString(Index,"|",null);
-					Index++;
-				}
-				catch(Exception ex){}*/
 				process("|");
 				process(back);
 			}
