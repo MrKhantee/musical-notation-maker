@@ -5,26 +5,23 @@ import org.jfugue.*;
 public class MusicHandler 
 {
 	Vector MusicString;
-	MusicHandler(Vector s)
+	int length;
+	MusicHandler(Vector s,int l)
 	{
 		MusicString=s;
+		length=l;
 	}
 	public void Run()
 	{
 		Pattern song=new Pattern();
 		song.add("I24");
 		Player player = new Player();
-		for(int i=0;i<MusicString.size();i++)
+		for(int i=0;i<length;i++)
 		{
 			if(MusicString.get(i)!=null)
 			{
-				if(MusicString.get(i).toString()=="|")
+				if(MusicString.get(i).toString().matches("[A-G|R|\\|].*"))
 				{
-					song.add(MusicString.get(i).toString());
-				}
-				else
-				{
-					
 					song.add(MusicString.get(i).toString());
 				}
 			}

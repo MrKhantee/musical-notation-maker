@@ -7,9 +7,11 @@ import java.awt.Robot;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -74,6 +76,14 @@ import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import java.awt.event.MouseMotionAdapter;
+import javax.swing.Box;
+import javax.swing.JTable;
+import javax.swing.JToolBar;
+import java.awt.Color;
+import java.awt.Dimension;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 
 
@@ -82,13 +92,13 @@ public class NoteEditor extends JFrame {
 
 	private JPanel contentPane;
 	private JTextPane textPane;
-	private final ButtonGroup buttonGroup = new ButtonGroup();
-	private final ButtonGroup buttonGroup_1 = new ButtonGroup();
 	private JToggleButton selectedNoteButton;   //中介者
 	private JToggleButton selectedTuneButton;   //中介者
 	private JScrollPane scrollPane;
 	protected Vector Content;
 	protected Shape PreTieShape;
+	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private JTextField textField;
 
 	/**
 	 * Launch the application.
@@ -111,12 +121,18 @@ public class NoteEditor extends JFrame {
 	 */
 	public NoteEditor() {
 		setTitle("簡譜編輯器");
+		try
+		{
+			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+		}
+		catch(Exception e){}
+		JFrame.setDefaultLookAndFeelDecorated(true);
 		Content=new Vector();
 		PreTieShape=null;
 		final MutableAttributeSet attr = new SimpleAttributeSet(); 
         Style style=new StyleContext().new NamedStyle();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 674, 493);
+		setBounds(100, 100, 720, 541);
 		
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
@@ -132,16 +148,24 @@ public class NoteEditor extends JFrame {
 				{
 					JFileChooser fc = new JFileChooser();
 					//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					fc.setSelectedFile(new File("C:\\*.song")); 
 					int choose=fc.showSaveDialog(NoteEditor.this);
+					int timeFlag=0;
 					if(choose == JFileChooser.APPROVE_OPTION)
 					{
+						textPane.setText("");
 						File LoadPath = fc.getSelectedFile();
 						BufferedReader reader=new BufferedReader(new FileReader(LoadPath));;
 						String TempString;
 						FormatTransformer Transformer=new FormatTransformer();
 						while ((TempString = reader.readLine()) != null)
 						{
-							Transformer.FormatToNote(TempString,textPane.getStyledDocument());
+							if(timeFlag==0)
+							{
+								textField.setText(TempString);
+								timeFlag=1;
+							}
+							else Transformer.FormatToNote(TempString,textPane.getStyledDocument());
 						}
 						reader.close(); 
 					}
@@ -192,13 +216,18 @@ public class NoteEditor extends JFrame {
 						File savePath = fc.getSelectedFile();
 						FileWriter fileWriter=new FileWriter(savePath);
 						String PreNote=null;
+						
+						fileWriter.write(textField.getText()+System.getProperty("line.separator"));
 						for(int i=0;i<textPane.getText().length();i++)
 						{
 							if(Content.get(i)!=null)
 							{
-								if(PreNote!=null && PreNote.matches("[A-G|R].*")) fileWriter.write(" ");
-								if(Content.get(i).toString().matches("[A-G|R|\\|].*")) fileWriter.write(Content.get(i).toString());
-								PreNote=Content.get(i).toString();
+								if(PreNote!=null && PreNote.matches("[A-GR].*") && Content.get(i).toString().matches("[A-GR].*"))  fileWriter.write(" ");
+								if(Content.get(i).toString().matches("[A-G|R].*"))
+								{
+									fileWriter.write(Content.get(i).toString());
+									PreNote=Content.get(i).toString();
+								}
 							}
 						}
 						fileWriter.close(); 
@@ -215,39 +244,34 @@ public class NoteEditor extends JFrame {
 		contentPane.setLayout(null);
 		
 		scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 118, 638, 293);
+		scrollPane.setBounds(10, 118, 684, 354);
 		contentPane.add(scrollPane);
 		
 		textPane = new JTextPane();
-		textPane.addCaretListener(new CaretListener() {
-			public void caretUpdate(CaretEvent arg0) {
-			}
-		});
-		scrollPane.setViewportView(textPane);
 		textPane.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if(textPane.getCaretPosition()-1>=0)
-				{
-					int preText=-1;
-					try
-					{
-						preText = textPane.getStyledDocument().getText(textPane.getCaretPosition()-1,1).charAt(0)-'0';
-						if(preText>=0 && preText<=7)
-						{
-							textPane.setCaretPosition(textPane.getCaretPosition()+1);
-						}
-					}
-					catch (Exception e) 
-					{
-						e.printStackTrace();
-					} 
+			public void mouseReleased(MouseEvent arg0) {
+			    if(textPane.getSelectedText()!=null)
+			    {
+			    	textPane.setCharacterAttributes(attr, false);
+			    	//textPane.getStyledDocument().setCharacterAttributes(textPane.getSelectionStart(), textPane.getSelectionEnd()-textPane.getSelectionStart(),attr,false);
+			    	textPane.repaint();
+			    }
+			}
+		});
+		textPane.addCaretListener(new CaretListener() {
+			public void caretUpdate(CaretEvent arg0) {
 
-				}
+			}
+		});
+		textPane.addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseDragged(MouseEvent arg0) {
 
 			}
 		});
 
+		scrollPane.setViewportView(textPane);
 		textPane.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		textPane.setEditorKit(new StyledEditorKit() { 
             public ViewFactory getViewFactory() { 
@@ -290,24 +314,7 @@ public class NoteEditor extends JFrame {
         		textPane.setCharacterAttributes(attr,false);
         		textPane.repaint();
         		}
-        		/*if(e.getKeyChar()=='\b')
-        		{
-        			textPane.setCaretPosition(textPane.getCaretPosition()-1);
-        		}*/
         	}
-        	/*@Override
-        	public void keyReleased(KeyEvent e) {
-        		if((e.getKeyCode()>=48 && e.getKeyCode()<=57) || (e.getKeyCode()>=96 && e.getKeyCode()<=105))
-        		{
-        			try
-        			{
-        				if(textPane.getText()!=null && textPane.getText().matches(".*\\d\\/\\d.*"))
-        				textPane.getStyledDocument().insertString(textPane.getCaretPosition(), " ",null );
-        			}
-        			catch(Exception error) {}
-        		}
-        				
-        	}*/
         });
         StyleConstants.setSpaceAbove(style, 20);
         StyleConstants.setSpaceBelow(style, 10);
@@ -317,69 +324,216 @@ public class NoteEditor extends JFrame {
         StyleConstants.setFontSize(style, 20);
         textPane.setLogicalStyle(style);
 		
-		JButton btnSharp = new JButton("Sharp");
-		btnSharp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				StyledDocument doc = textPane.getStyledDocument();
-				try
-				{
-				    doc.insertString(doc.getLength(), "#",null );
-				}
-				catch(Exception e) { System.out.println(e); }
-			}
-		});
-		btnSharp.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnSharp.setBounds(40, 52, 119, 23);
-		contentPane.add(btnSharp);
-		
 		String[] Notes = {"4th","8th","16th","32th"};
-		JComboBox comboBox = new JComboBox(Notes);
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"1th", "2th", "4th", "8th", "16th", "32th"}));
-		comboBox.setSelectedIndex(2);
-		comboBox.addItemListener(new ItemListener() {
+		
+		JComboBox comboBox_1 = new JComboBox(new Object[]{});
+		comboBox_1.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				if (arg0.getStateChange() == ItemEvent.SELECTED) 
 				{
 					String Note=arg0.getItem().toString();
-					if(Note=="1th")
+					if(Note=="+0")
 					{
-						attr.addAttribute("Note",new Integer(-2)); 
+						attr.addAttribute("Tune",new Integer(0)); 
 						textPane.setCharacterAttributes(attr,false);
 					}
-					if(Note=="2th")
+					else if(Note=="+8")
 					{
-						attr.addAttribute("Note",new Integer(-1)); 
-						
+						attr.addAttribute("Tune",new Integer(1)); 
 						textPane.setCharacterAttributes(attr,false);
 					}
-					if(Note=="4th")
+					else if(Note=="+16")
 					{
-						attr.addAttribute("Note",new Integer(0)); 
+						attr.addAttribute("Tune",new Integer(2)); 
 						textPane.setCharacterAttributes(attr,false);
 					}
-					else if(Note=="8th")
+					else if(Note=="+24")
 					{
-						attr.addAttribute("Note",new Integer(1)); 
+						attr.addAttribute("Tune",new Integer(3)); 
 						textPane.setCharacterAttributes(attr,false);
 					}
-					else if(Note=="16th")
+					else if(Note=="-8")
 					{
-						attr.addAttribute("Note",new Integer(2)); 
+						attr.addAttribute("Tune",new Integer(-1)); 
 						textPane.setCharacterAttributes(attr,false);
 					}
-					else if(Note=="32th")
+					else if(Note=="-16")
 					{
-						attr.addAttribute("Note",new Integer(3)); 
+						attr.addAttribute("Tune",new Integer(-2)); 
+						textPane.setCharacterAttributes(attr,false);
+					}
+					else if(Note=="-24")
+					{
+						attr.addAttribute("Tune",new Integer(-3)); 
 						textPane.setCharacterAttributes(attr,false);
 					}
 				}
-				
 			}
 		});
-		comboBox.setBounds(90, 21, 111, 21);
-		contentPane.add(comboBox);
+		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"+0", "+8", "+16", "+24", "-8", "-16", "-24"}));
+		comboBox_1.setSelectedIndex(0);
+		comboBox_1.setBounds(598, 53, 96, 34);
+		contentPane.add(comboBox_1);
 		
-		JButton btnFalt = new JButton("Flat");
+		JButton btnRun = new JButton("Run");
+		btnRun.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MusicHandler Handler=new MusicHandler(Content,textPane.getText().length());
+				Handler.Run();
+			}
+		});
+		btnRun.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnRun.setBounds(372, 59, 119, 23);
+		contentPane.add(btnRun);
+		
+		JToolBar toolBar = new JToolBar();
+		toolBar.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		toolBar.setFloatable(false);
+		toolBar.setBounds(0, 0, 704, 42);
+		contentPane.add(toolBar);
+		
+		JToggleButton toggleButton_5 = new JToggleButton("");
+		toggleButton_5.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				attr.addAttribute("Note",new Integer(-2)); 
+				textPane.setCharacterAttributes(attr,false);
+			}
+		});
+		buttonGroup.add(toggleButton_5);
+		toolBar.add(toggleButton_5);
+		toggleButton_5.setIcon(new ImageIcon(".\\img\\1.gif"));
+		
+		JToggleButton toggleButton = new JToggleButton("");
+		toggleButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				attr.addAttribute("Note",new Integer(-1)); 
+				textPane.setCharacterAttributes(attr,false);
+			}
+		});
+		buttonGroup.add(toggleButton);
+		toolBar.add(toggleButton);
+		toggleButton.setIcon(new ImageIcon(".\\img\\2.gif"));
+		
+		JToggleButton toggleButton_1 = new JToggleButton("");
+		toggleButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				attr.addAttribute("Note",new Integer(0)); 
+				textPane.setCharacterAttributes(attr,false);
+			}
+		});
+		toggleButton_1.setSelected(true);
+		buttonGroup.add(toggleButton_1);
+		toolBar.add(toggleButton_1);
+		toggleButton_1.setIcon(new ImageIcon(".\\img\\3.gif"));
+		
+		JToggleButton toggleButton_2 = new JToggleButton("");
+		toggleButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				attr.addAttribute("Note",new Integer(1)); 
+				textPane.setCharacterAttributes(attr,false);
+			}
+		});
+		buttonGroup.add(toggleButton_2);
+		toolBar.add(toggleButton_2);
+		toggleButton_2.setIcon(new ImageIcon(".\\img\\4.gif"));
+		
+		JToggleButton toggleButton_3 = new JToggleButton("");
+		toggleButton_3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				attr.addAttribute("Note",new Integer(2)); 
+				textPane.setCharacterAttributes(attr,false);
+			}
+		});
+		buttonGroup.add(toggleButton_3);
+		toolBar.add(toggleButton_3);
+		toggleButton_3.setIcon(new ImageIcon(".\\img\\5.gif"));
+		
+		JToggleButton toggleButton_4 = new JToggleButton("");
+		toggleButton_4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				attr.addAttribute("Note",new Integer(3)); 
+				textPane.setCharacterAttributes(attr,false);
+			}
+		});
+		toolBar.add(toggleButton_4);
+		buttonGroup.add(toggleButton_4);
+		toggleButton_4.setIcon(new ImageIcon(".\\img\\6.gif"));
+		
+		JButton btnDot = new JButton("");
+		toolBar.add(btnDot);
+		btnDot.setIcon(new ImageIcon(".\\img\\dot.gif"));
+		btnDot.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			    if(textPane.getSelectedText()!=null)
+			    {
+			    	MutableAttributeSet TempAttr = new SimpleAttributeSet(); 
+			    	TempAttr.addAttribute("Dot", new Integer(1));
+			    	textPane.getStyledDocument().setCharacterAttributes(textPane.getSelectionStart(), textPane.getSelectionEnd()-textPane.getSelectionStart(),TempAttr,false);
+			    }
+			}
+		});
+		
+        
+        
+        
+		JButton btnSharp = new JButton("#");
+		toolBar.add(btnSharp);
+		btnSharp.setFont(new Font("微軟正黑體", Font.BOLD, 22));
+		
+		JButton btnFalt = new JButton("b");
+		btnFalt.setFont(new Font("微軟正黑體", Font.BOLD, 22));
+		toolBar.add(btnFalt);
+		
+		JLabel lblNewLabel = new JLabel("音高:");
+		lblNewLabel.setFont(new Font("標楷體", Font.BOLD, 18));
+		lblNewLabel.setBounds(531, 42, 57, 52);
+		contentPane.add(lblNewLabel);
+		
+		textField = new JTextField();
+		textField.setBounds(64, 57, 103, 27);
+		contentPane.add(textField);
+		textField.setColumns(10);
+		
+		JLabel lblNewLabel_1 = new JLabel("拍號:");
+		lblNewLabel_1.setFont(new Font("標楷體", Font.BOLD, 18));
+		lblNewLabel_1.setBounds(10, 56, 57, 31);
+		contentPane.add(lblNewLabel_1);
+		
+		JButton btnNewButton = new JButton("Check");
+		btnNewButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String MusicString="",PreNote=null;
+				for(int i=0;i<textPane.getText().length();i++)
+				{
+					if(Content.get(i)!=null)
+					{
+						String s=Content.get(i).toString();
+						if(PreNote!=null && PreNote.matches("[A-GR].*"))
+						{
+							MusicString=MusicString+" ";
+						}
+						if(Content.get(i).toString().matches("[A-G|R].*")) MusicString=MusicString+Content.get(i).toString();
+						PreNote=Content.get(i).toString();
+					}
+				}
+				CheckBeat CheckBeater=new CheckBeat(textField.getText(),MusicString);
+				try
+				{
+					boolean CheckAns=CheckBeater.Start();
+					if(CheckAns==true)
+					{
+						JOptionPane.showMessageDialog(NoteEditor.this,"節拍數正確");
+					}
+					else JOptionPane.showMessageDialog(NoteEditor.this,"節拍數有誤");
+				}
+				catch(Exception e){}
+			}
+		});
+		btnNewButton.setBounds(211, 59, 119, 23);
+		contentPane.add(btnNewButton);
+		
+		
 		btnFalt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				StyledDocument doc = textPane.getStyledDocument();
@@ -391,95 +545,16 @@ public class NoteEditor extends JFrame {
 				
 			}
 		});
-		btnFalt.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnFalt.setBounds(169, 52, 119, 23);
-		contentPane.add(btnFalt);
-		
-		JComboBox comboBox_1 = new JComboBox(new Object[]{});
-		comboBox_1.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent arg0) {
-				if (arg0.getStateChange() == ItemEvent.SELECTED) 
+		btnSharp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				StyledDocument doc = textPane.getStyledDocument();
+				try
 				{
-					String Note=arg0.getItem().toString();
-					if(Note=="None")
-					{
-						attr.addAttribute("Tune",new Integer(0)); 
-						textPane.setCharacterAttributes(attr,false);
-					}
-					else if(Note=="H")
-					{
-						attr.addAttribute("Tune",new Integer(1)); 
-						textPane.setCharacterAttributes(attr,false);
-					}
-					else if(Note=="HH")
-					{
-						attr.addAttribute("Tune",new Integer(2)); 
-						textPane.setCharacterAttributes(attr,false);
-					}
-					else if(Note=="HHH")
-					{
-						attr.addAttribute("Tune",new Integer(3)); 
-						textPane.setCharacterAttributes(attr,false);
-					}
-					else if(Note=="L")
-					{
-						attr.addAttribute("Tune",new Integer(-1)); 
-						textPane.setCharacterAttributes(attr,false);
-					}
-					else if(Note=="LL")
-					{
-						attr.addAttribute("Tune",new Integer(-2)); 
-						textPane.setCharacterAttributes(attr,false);
-					}
-					else if(Note=="LLL")
-					{
-						attr.addAttribute("Tune",new Integer(-3)); 
-						textPane.setCharacterAttributes(attr,false);
-					}
+				    doc.insertString(doc.getLength(), "#",null );
 				}
+				catch(Exception e) { System.out.println(e); }
 			}
 		});
-		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"None", "H", "HH", "HHH", "L", "LL", "LLL"}));
-		comboBox_1.setSelectedIndex(0);
-		comboBox_1.setBounds(226, 21, 111, 21);
-		contentPane.add(comboBox_1);
-		
-		JButton btnRun = new JButton("Run");
-		btnRun.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				MusicHandler Handler=new MusicHandler(Content);
-				Handler.Run();
-			}
-		});
-		btnRun.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnRun.setBounds(310, 52, 119, 23);
-		contentPane.add(btnRun);
-		
-		JToggleButton tglbtnNewToggleButton = new JToggleButton("Dot");
-		tglbtnNewToggleButton.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent arg0) {
-				int state = arg0.getStateChange();
-			    if (state == ItemEvent.SELECTED) 
-			    {
-			    	attr.addAttribute("Dot",new Integer(1)); 
-			    	textPane.setCharacterAttributes(attr,false);
-			    }
-			    else
-			    {
-			    	attr.addAttribute("Dot",new Integer(0)); 
-			    	textPane.setCharacterAttributes(attr,false);
-			    }
-			}
-		});
-
-		tglbtnNewToggleButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		tglbtnNewToggleButton.setBounds(453, 52, 119, 23);
-		contentPane.add(tglbtnNewToggleButton);
-		
-		JLabel lblNewLabel = new JLabel("音符:");
-		lblNewLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
-		lblNewLabel.setBounds(35, 21, 39, 15);
-		contentPane.add(lblNewLabel);
 		
 		/*JButton btnTie = new JButton("Tie");
 		btnTie.addActionListener(new ActionListener() {
@@ -500,16 +575,6 @@ public class NoteEditor extends JFrame {
 		/*btnTie.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		btnTie.setBounds(452, 76, 119, 23);
 		contentPane.add(btnTie);*/
-		textPane.getStyledDocument().addDocumentListener(new DocumentListener(){
-		      public void changedUpdate(DocumentEvent documentEvent) {
-		        }
-		      public void insertUpdate(DocumentEvent documentEvent) {
-	        }
-	        public void removeUpdate(DocumentEvent documentEvent) {
-	        	int a=0;
-	        }
-			
-		});
 				
 	}
 }
@@ -674,7 +739,7 @@ class MyLabelView extends LabelView {
             			x2=(int) charShape.getBounds().getX(); 
             			for(int i=0;i<tuneCount;i++)
             			{
-            				g.fillOval(x1+3, y-3*i-7, 3,3);
+            				g.fillOval(x1+3, y-3*i-8, 3,3);
             			}
 
             		}
@@ -737,28 +802,34 @@ class CustomDocument extends DefaultStyledDocument {
     @Override
     public void insertString(int offset, String string, AttributeSet attributeSet)
             throws BadLocationException {
-    	if(offset-1>=0)
+    	if(this.getLength()>0 && offset-1>=0)
     	{
-    		if(Character.isDigit(this.getText(offset-1,1).charAt(0)) && Character.isDigit(string.charAt(0)))
+    		if(Character.isDigit(this.getText(offset-1,1).charAt(0)))
     		{
-    			super.insertString(offset," "+string+" ", attributeSet);
+    			if(offset<this.getLength())
+    			{
+    				if(this.getText(offset,1)!=" ")
+    				{
+    	    			super.insertString(offset," ", attributeSet);
+    	    			offset++;
+    				}
+    			}
+    			
+    			else
+    			{
+	    			super.insertString(offset," ", attributeSet);
+	    			offset++;
+    			}
     		}
-    		else if(Character.isDigit(string.charAt(0)))
-    		{
-    			super.insertString(offset, string+" ", attributeSet);
-    		}
-            else
-            {
-            	super.insertString(offset, string, attributeSet);
-            }
     	}
-    	else if(Character.isDigit(string.charAt(0)))
-        {
-            super.insertString(offset, string+" ", attributeSet);
-        }
-        else
-        {
-        	super.insertString(offset, string, attributeSet);
-        }
+    	if(Character.isDigit(string.charAt(0)))
+    	{
+    		super.insertString(offset, string+" ", attributeSet);
+    	}
+    	else
+    	{
+    		super.insertString(offset, string, attributeSet);
+    	}
+
     }
 }

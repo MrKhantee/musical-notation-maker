@@ -245,7 +245,7 @@ public class FormatTransformer
 		
 		try
 		{
-			Doc.insertString(Index,NoteCorrespond.indexOf(NoteInform.charAt(0))+" ",attr);
+			Doc.insertString(Index,NoteCorrespond.indexOf(NoteInform.charAt(0))+"",attr);
 			Index=Index+2;
 		}
 		catch(Exception ex){}
