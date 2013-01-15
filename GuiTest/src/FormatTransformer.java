@@ -243,15 +243,6 @@ public class FormatTransformer
 			Index=Index+2;
 		}
 		catch(Exception ex){}
-		/*if(notion[2].matches(".+\\)"))
-		{
-			String[] delay = notion[2].split("\\)");
-			System.out.println("有延音 : "+ delay[0]);
-		}
-		else
-		{
-			System.out.println("沒有延音");
-		}*/
 	}
 	
 }

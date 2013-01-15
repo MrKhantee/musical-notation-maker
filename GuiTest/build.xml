@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<project name="GuiTest" default="test"> 
+    <property name="src.dir" value="src"/> 
+    <property name="bin.dir" value="bin"/>
+    <property name="report.dir" value="report"/>
+    <property name="ECLIPSE_HOME" value="../../../Desktop/eclipse"/>
+	<!-- 於此處指定eclipse之位置 -->
+
+    <path id="JUnit 4.libraryclasspath">
+        <pathelement location="${ECLIPSE_HOME}/plugins/org.junit_4.10.0.v4_10_0_v20120426-0900/junit.jar"/>
+        <pathelement location="${ECLIPSE_HOME}/plugins/org.hamcrest.core_1.1.0.v20090501071000.jar"/>
+    </path>
+    <path id="GuiTest.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="lib/jfugue-4.0.3.jar"/>
+        <path refid="JUnit 4.libraryclasspath"/>
+    </path>
+	
+
+    <target name="clean">
+        <delete dir="${bin.dir}"/>
+        <delete dir="${report.dir}"/>
+    </target>
+    
+    <target name="prepare" depends="clean"> 
+        <mkdir dir="${bin.dir}"/> 
+        <mkdir dir="${report.dir}"/> 
+    </target> 
+
+    <target name="compile" depends="prepare"> 
+        <javac srcdir="${src.dir}" destdir="${bin.dir}"> 
+            <classpath refid="GuiTest.classpath"/> 
+        </javac>
+    </target>
+        	
+    <target name="test" depends="compile"> 
+        <junit printsummary="yes">
+            <formatter type="plain"/>
+        	<test name="BeatTester"  todir="${report.dir}"/> 
+            <classpath> 
+                <pathelement location="${bin.dir}"/>
+                <path refid="GuiTest.classpath" />  
+            </classpath>
+        </junit> 
+    </target> 
+
+ 
+</project>

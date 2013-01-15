@@ -376,7 +376,7 @@ public class NoteEditor extends JFrame {
 			}
 		});
 		btnRun.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-		btnRun.setBounds(372, 59, 119, 23);
+		btnRun.setBounds(402, 59, 119, 23);
 		contentPane.add(btnRun);
 		
 		JToolBar toolBar = new JToolBar();
@@ -483,13 +483,13 @@ public class NoteEditor extends JFrame {
 		contentPane.add(lblNewLabel);
 		
 		textField = new JTextField();
-		textField.setBounds(64, 57, 103, 27);
+		textField.setBounds(116, 57, 103, 27);
 		contentPane.add(textField);
 		textField.setColumns(10);
 		
-		JLabel lblNewLabel_1 = new JLabel("拍號:");
+		JLabel lblNewLabel_1 = new JLabel("拍號(N/N):");
 		lblNewLabel_1.setFont(new Font("標楷體", Font.BOLD, 18));
-		lblNewLabel_1.setBounds(10, 56, 57, 31);
+		lblNewLabel_1.setBounds(10, 56, 103, 31);
 		contentPane.add(lblNewLabel_1);
 		
 		JButton btnNewButton = new JButton("Check");
@@ -510,7 +510,7 @@ public class NoteEditor extends JFrame {
 						PreNote=Content.get(i).toString();
 					}
 				}
-				CheckBeat CheckBeater=new CheckBeat(textField.getText(),MusicString);
+				checkBeat CheckBeater=new checkBeat(textField.getText(),MusicString);
 				try
 				{
 					boolean CheckAns=CheckBeater.Start();
@@ -523,7 +523,7 @@ public class NoteEditor extends JFrame {
 				catch(Exception e){}
 			}
 		});
-		btnNewButton.setBounds(211, 59, 119, 23);
+		btnNewButton.setBounds(246, 59, 119, 23);
 		contentPane.add(btnNewButton);
 		
 		
