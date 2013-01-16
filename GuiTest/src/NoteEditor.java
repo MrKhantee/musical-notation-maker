@@ -35,7 +35,6 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 import javax.swing.text.Position;
-import javax.swing.text.StyleContext.NamedStyle;
 import javax.imageio.*;
 import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
@@ -49,46 +48,32 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Vector;
-
 import javax.swing.ButtonGroup;
-
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.BevelBorder;
-import javax.swing.border.SoftBevelBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import javax.swing.DefaultComboBoxModel;
 import java.awt.Font;
-import java.awt.event.InputMethodListener;
-import java.awt.event.InputMethodEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.CaretEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JScrollBar;
-import java.awt.Component;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import java.awt.event.MouseMotionAdapter;
-import javax.swing.Box;
-import javax.swing.JTable;
 import javax.swing.JToolBar;
-import java.awt.Color;
-import java.awt.Dimension;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 
 
 
 public class NoteEditor extends JFrame {
+
 
 	private JPanel contentPane;
 	private JTextPane textPane;
@@ -501,7 +486,6 @@ public class NoteEditor extends JFrame {
 				{
 					if(Content.get(i)!=null)
 					{
-						String s=Content.get(i).toString();
 						if(PreNote!=null && PreNote.matches("[A-GR].*"))
 						{
 							MusicString=MusicString+" ";
@@ -607,7 +591,7 @@ class MyLabelView extends LabelView {
     	Integer Dot=((Integer)getElement().getAttributes().getAttribute("Dot")); 
         int End=getEndOffset();
         Shape charShape=null;
-        int x1=0,x2=0,lineCount=0,tuneCount=0,dotCount=0,tieCount=0;
+        int x1=0,x2=0,lineCount=0,tuneCount=0,dotCount=0;
 
         
         if(Dot!=null && Dot.intValue()>0)
@@ -618,7 +602,7 @@ class MyLabelView extends LabelView {
             	try
             	{
             		String charToDraw=getText(Start,Start+1).toString();
-            		if(!charToDraw.matches("[1-7]+")) continue;
+            		if(!charToDraw.matches("[0-7]+")) continue;
             		charShape=modelToView(Start,a,Position.Bias.Forward);
             		x1=(int) charShape.getBounds().getX(); 
             		charShape=modelToView(Start+1,a,Position.Bias.Forward);
@@ -639,7 +623,7 @@ class MyLabelView extends LabelView {
             	try
             	{
             		String charToDraw=getText(Start,Start+1).toString();
-            		if(!charToDraw.matches("[1-7]+")) continue;
+            		if(!charToDraw.matches("[0-7]+")) continue;
             		charShape=modelToView(Start,a,Position.Bias.Forward);
             		x1=(int) charShape.getBounds().getX(); 
             		charShape=modelToView(Start+1,a,Position.Bias.Forward);
@@ -680,7 +664,7 @@ class MyLabelView extends LabelView {
             		try
             		{
             			String charToDraw=getText(Start,Start+1).toString();
-            			if(!charToDraw.matches("[1-7]+")) continue;
+            			if(!charToDraw.matches("[0-7]+")) continue;
             			charShape=modelToView(Start,a,Position.Bias.Forward);
             			x1=(int) charShape.getBounds().getX(); 
             			charShape=modelToView(Start+1,a,Position.Bias.Forward);
@@ -704,7 +688,7 @@ class MyLabelView extends LabelView {
             		try
             		{
             			String charToDraw=getText(Start,Start+1).toString();
-            			if(!charToDraw.matches("[1-7]+")) continue;
+            			if(!charToDraw.matches("[0-7]+")) continue;
             			charShape=modelToView(Start,a,Position.Bias.Forward);
             			x1=(int) charShape.getBounds().getX(); 
             			charShape=modelToView(Start+1,a,Position.Bias.Forward);
